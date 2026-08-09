@@ -68,7 +68,7 @@ function Shell({ user, peran, children }: { user: User; peran: Peran | null; chi
             const isActive = loc.pathname === n.to
             return (
               <a key={n.to} href={`#${n.to}`} className={`bn-item${isActive ? ' active' : ''}`}>
-                <MIcon n={n.icon} />
+                <span className="bn-icon"><MIcon n={n.icon} /></span>
                 <span className="bn-label">{n.label}</span>
               </a>
             )
