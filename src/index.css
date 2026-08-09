@@ -704,4 +704,45 @@ input, select, textarea { font-family: var(--font); }
   transition: none;
 }
 .st-chip:active { transform: scale(0.92); }
+
+/* ── Nilai (input angka) ─────────────────────────────────────────── */
+.num-input {
+  max-width: 92px;
+  text-align: center;
+  padding: 6px 8px;
+}
+
+/* ── Rapor & cetak ───────────────────────────────────────────────── */
+.rapor {
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  padding: 20px 18px;
+  margin-top: 14px;
+}
+.rapor-head { text-align: center; margin-bottom: 12px; }
+.rapor-head h2 { font-size: 1.05rem; margin: 0 0 2px; }
+.rapor-head p { margin: 2px 0; font-size: 0.78rem; color: var(--on-surface-variant); }
+.rapor-head .r-sub { font-weight: 600; color: var(--on-surface); font-size: 0.85rem; }
+.r-id { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 0.82rem; margin-bottom: 12px; }
+.rapor-table { width: 100%; border-collapse: collapse; }
+.rapor-table th, .rapor-table td {
+  border: 1px solid var(--outline-variant);
+  padding: 5px 7px;
+  font-size: 0.78rem;
+  text-align: left;
+}
+.rapor-table th { background: var(--surface-container-high); font-weight: 600; }
+.r-c { text-align: center !important; }
+.r-bold { font-weight: 700; }
+.r-foot { font-size: 0.68rem; color: var(--on-surface-variant); margin-top: 10px; text-align: right; }
+
+@media print {
+  .top-app-bar, .bottom-nav, .no-print { display: none !important; }
+  body { background: #fff !important; }
+  .page-wrap { max-width: 100% !important; padding: 0; }
+  .card { box-shadow: none; }
+  .rapor { border: none; box-shadow: none; padding: 0 4px; }
+  .rapor-table th, .rapor-table td { border-color: #333; }
+}
 .st-chip.on { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }

@@ -12,13 +12,20 @@ export default function Dashboard({ peran, email }: { peran: Peran | null; email
         { label: 'Jurusan', sub: 'IPA / IPS / BHS', to: '/jurusan', icon: 'category' },
         { label: 'Wali Murid', sub: 'link wali ke anak', to: '/wali', icon: 'family_restroom' },
         { label: 'Absensi', sub: 'input & rekap kehadiran', to: '/absensi', icon: 'event_available' },
-        { label: 'Nilai & Rapor', sub: 'Fase 1.4', to: '/', icon: 'scoreboard' },
+        { label: 'Nilai', sub: 'input nilai per kelas', to: '/nilai', icon: 'scoreboard' },
+        { label: 'Rapor', sub: 'rekap & cetak per siswa', to: '/rapor', icon: 'assignment' },
         { label: 'Jadwal', sub: 'Fase 1.5', to: '/', icon: 'calendar_month' },
         { label: 'Keuangan SPP', sub: 'Fase 1.6', to: '/', icon: 'payments' },
       ]
     : [
         { label: 'Dashboard Saya', sub: peran === 'guru' ? 'Absensi & nilai' : 'Info anak', to: '/', icon: 'dashboard' },
-        ...(peran === 'guru' ? [{ label: 'Absensi', sub: 'input kehadiran', to: '/absensi', icon: 'event_available' }] : []),
+        ...(peran === 'guru'
+          ? [
+              { label: 'Absensi', sub: 'input kehadiran', to: '/absensi', icon: 'event_available' },
+              { label: 'Nilai', sub: 'input nilai kelas', to: '/nilai', icon: 'scoreboard' },
+              { label: 'Rapor', sub: 'rekap & cetak', to: '/rapor', icon: 'assignment' },
+            ]
+          : []),
       ]
 
   return (

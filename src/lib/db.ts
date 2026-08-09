@@ -227,3 +227,101 @@ export async function guruIdLogin(): Promise<string | null> {
   const { data } = await supabase.from('akun').select('terkait_id').eq('user_id', user.id).maybeSingle()
   return (data?.terkait_id as string | null) ?? null
 }
+
+// ── Nilai & Rapor ────────────────────────────────────────────────
+export const JENIS_NILAI = ['tugas', 'formatif', 'sumatif', 'uts', 'uas'] as const
+export type JenisNilai = (typeof JENIS_NILAI)[number]
+export const LABEL_JENIS: Record<string, string> = {
+  tugas: 'Tugas', formatif: 'Formatif', sumatif: 'Sumatif', uts: 'UTS', uas: 'UAS',
+}
+
+export interface NilaiRow { id?: string | null; siswa_id: string; nilai: number | null }
+
+/** nilai per-siswa untuk (rombel, mapel, jenis, semester) */
+export async function listNilai(rombelId: string, mapelId: string, jenis: string, semester: number, tahunId: string): Promise<NilaiRow[]> {
+  const { data } = await supabase
+    .from('nilai')
+    .select('id, siswa_id, nilai')
+    .eq('rombel_id', rombelId).eq('mapel_id', mapelId)
+    .eq('jenis', jenis).eq('semester', semester).eq('tahun_ajaran_id', tahunId)
+  return (data ?? []) as NilaiRow[]
+}
+
+/** simpan massal: upsert baris terisi (unique siswa+mapel+semester+jenis), hapus yang dikosongkan */
+export async function simpanNilai(
+  rows: NilaiRow[], guruId: string | null, mapelId: string, rombelId: string,
+  jenis: string, semester: number, tahunId: string,
+): Promise<void> {
+  const isi = rows.filter((r) => r.nilai !== null)
+  const kosong = rows.filter((r) => r.nilai === null && r.id)
+  if (isi.length > 0) {
+    const { error } = await supabase.from('nilai').upsert(
+      isi.map((r) => ({
+        id: r.id ?? undefined, siswa_id: r.siswa_id, nilai: r.nilai,
+        mapel_id: mapelId, rombel_id: rombelId, guru_id: guruId,
+        jenis, semester, tahun_ajaran_id: tahunId,
+      })),
+      { onConflict: 'siswa_id,mapel_id,semester,jenis' },
+    )
+    if (error) throw new Error(error.message)
+  }
+  for (const r of kosong) {
+    const { error } = await supabase.from('nilai').delete().eq('id', r.id)
+    if (error) throw new Error(error.message)
+  }
+}
+
+export interface RekapNilai {
+  mapelId: string; kode: string; nama: string
+  byJenis: Record<string, number | null>
+  rerata: number | null
+}
+
+/** rekap nilai satu siswa per mapel untuk satu semester (untuk rapor) */
+export async function rekapNilaiSiswa(siswaId: string, tahunId: string, semester: number): Promise<RekapNilai[]> {
+  const { data, error } = await supabase
+    .from('nilai')
+    .select('mapel:mapel_id(id,kode,nama), jenis, nilai')
+    .eq('siswa_id', siswaId).eq('tahun_ajaran_id', tahunId).eq('semester', semester)
+  if (error) throw new Error(error.message)
+  const m = new Map<string, RekapNilai>()
+  ;(data ?? [] as any[]).forEach((r) => {
+    const mpRaw = r.mapel
+    const mp = (Array.isArray(mpRaw) ? mpRaw[0] : mpRaw) as { id?: string; kode?: string; nama?: string } | undefined
+    if (!mp?.id) return
+    let rec = m.get(mp.id)
+    if (!rec) {
+      rec = { mapelId: mp.id, kode: mp.kode ?? '', nama: mp.nama ?? '', byJenis: {}, rerata: null }
+      m.set(mp.id, rec)
+    }
+    rec.byJenis[r.jenis as string] = Number(r.nilai)
+  })
+  const out = [...m.values()].sort((a, b) => a.kode.localeCompare(b.kode))
+  out.forEach((o) => {
+    const vals = JENIS_NILAI.map((j) => o.byJenis[j]).filter((v): v is number => v !== undefined && v !== null)
+    o.rerata = vals.length > 0 ? vals.reduce((s, v) => s + v, 0) / vals.length : null
+  })
+  return out
+}
+
+/** nama sekolah aktif (untuk kop rapor) */
+export async function namaSekolah(): Promise<string> {
+  const { data } = await supabase.from('sekolah').select('nama').limit(1).maybeSingle()
+  return (data?.nama as string | undefined) ?? 'Sekolah SMA'
+}
+
+/** predikat dari nilai rata-rata */
+export function predikat(rerata: number | null): string {
+  if (rerata === null) return '-'
+  if (rerata >= 90) return 'A'
+  if (rerata >= 80) return 'B'
+  if (rerata >= 70) return 'C'
+  if (rerata >= 60) return 'D'
+  return 'E'
+}
+
+/** format angka 0-100 tanpa desimal kalau bulat */
+export function fmtNilai(v: number | null | undefined): string {
+  if (v === null || v === undefined) return '-'
+  return Number.isInteger(v) ? String(v) : v.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')
+}
