@@ -325,3 +325,74 @@ export function fmtNilai(v: number | null | undefined): string {
   if (v === null || v === undefined) return '-'
   return Number.isInteger(v) ? String(v) : v.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')
 }
+
+// ── Jadwal ────────────────────────────────────────────────────────
+export interface JadwalRow {
+  id?: string | null
+  rombel_id: string
+  mapel_id: string | null
+  guru_id: string | null
+  hari: number // 1=Senin .. 6=Sabtu
+  jam_mulai: string // '07:00'
+  jam_selesai: string
+  ruang: string | null
+}
+
+export interface JadwalView extends JadwalRow {
+  mapel: { kode: string; nama: string } | null
+  guru: { nama: string } | null
+}
+
+/** slot jam default: 7 jam pelajaran 45 menit (mulai 07:00) */
+export const SLOT_JAM: { mulai: string; selesai: string }[] = [
+  { mulai: '07:00', selesai: '07:45' },
+  { mulai: '07:45', selesai: '08:30' },
+  { mulai: '08:30', selesai: '09:15' },
+  { mulai: '09:15', selesai: '10:00' },
+  { mulai: '10:00', selesai: '10:45' },
+  { mulai: '10:45', selesai: '11:30' },
+  { mulai: '11:30', selesai: '12:15' },
+]
+export const HARI = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] // index 0 => hari 1
+
+/** jadwal satu rombel (tahun aktif) dengan join mapel+guru via lookup lokal */
+export async function listJadwal(rombelId: string, tahunId: string): Promise<JadwalView[]> {
+  const { data } = await supabase
+    .from('jadwal')
+    .select('id, mapel_id, guru_id, hari, jam_mulai, jam_selesai, ruang')
+    .eq('rombel_id', rombelId).eq('tahun_ajaran_id', tahunId)
+    .order('hari').order('jam_mulai')
+  const rows = (data ?? []) as JadwalRow[]
+  if (rows.length === 0) return []
+  const [mapels, gurus] = await Promise.all([listMapel(), listGuru()])
+  const mp = new Map(mapels.map((m) => [m.id, m]))
+  const gr = new Map(gurus.map((g) => [g.id, g]))
+  return rows.map((r) => {
+    const m = r.mapel_id ? mp.get(r.mapel_id) : null
+    const g = r.guru_id ? gr.get(r.guru_id) : null
+    return {
+      ...r,
+      mapel: m ? { kode: m.kode, nama: m.nama } : null,
+      guru: g ? { nama: g.nama } : null,
+    }
+  })
+}
+
+/** simpan satu slot jadwal (upsert; unique rombel+hari+jam_mulai -> migrasi 0009) */
+export async function simpanJadwalSlot(row: JadwalRow): Promise<void> {
+  const { error } = await supabase.from('jadwal').upsert(
+    {
+      id: row.id ?? undefined,
+      rombel_id: row.rombel_id, mapel_id: row.mapel_id, guru_id: row.guru_id,
+      hari: row.hari, jam_mulai: row.jam_mulai, jam_selesai: row.jam_selesai,
+      ruang: row.ruang,
+    },
+    { onConflict: 'rombel_id,hari,jam_mulai' },
+  )
+  if (error) throw new Error(error.message)
+}
+
+export async function hapusJadwalSlot(id: string): Promise<void> {
+  const { error } = await supabase.from('jadwal').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}

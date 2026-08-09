@@ -745,4 +745,32 @@ input, select, textarea { font-family: var(--font); }
   .rapor { border: none; box-shadow: none; padding: 0 4px; }
   .rapor-table th, .rapor-table td { border-color: #333; }
 }
+
+/* ── Jadwal pelajaran ─────────────────────────────────────────── */
+.lbl { display: block; font-size: 0.75rem; font-weight: 600; color: var(--on-surface-variant); margin: 12px 0 4px; }
+.lbl:first-child { margin-top: 0; }
+.jd-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -4px; padding: 0 4px; }
+.jd-table { border-collapse: separate; border-spacing: 4px; min-width: 640px; width: 100%; }
+.jd-table th {
+  font-size: 0.75rem; font-weight: 600; color: var(--on-surface-variant);
+  padding: 4px 6px; text-align: center;
+}
+.jd-tim {
+  font-size: 0.72rem; font-weight: 600; color: var(--on-surface-variant);
+  text-align: center; white-space: nowrap; width: 64px; vertical-align: middle;
+}
+.jd-tim small { font-weight: 400; opacity: 0.8; }
+.jd-cell { padding: 2px; }
+.jd-btn {
+  width: 100%; min-height: 58px; display: flex; flex-direction: column; gap: 1px;
+  align-items: center; justify-content: center; border: none; border-radius: var(--radius-md, 12px);
+  font-family: inherit; padding: 4px 2px; cursor: pointer; text-align: center;
+}
+.jd-btn b { font-size: 0.82rem; line-height: 1.1; }
+.jd-btn small { font-size: 0.64rem; opacity: 0.85; line-height: 1.15; }
+.jd-ruang { opacity: 0.65 !important; }
+.jd-btn:active { transform: scale(0.96); }
+.jd-empty { background: var(--surface-container-high); border: 1.5px dashed var(--outline-variant); }
+.jd-plus { font-size: 1.15rem; font-weight: 400; color: var(--on-surface-variant); line-height: 1; }
+.jd-polos { display: block; min-height: 58px; }
 .st-chip.on { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
