@@ -42,6 +42,18 @@ create table public.jurusan (
   unique (sekolah_id, kode)
 );
 
+create table public.guru (
+  id uuid primary key default gen_random_uuid(),
+  sekolah_id bigint not null references public.sekolah(id),
+  user_id uuid unique references auth.users(id) on delete set null,
+  nip text unique,
+  nama text not null,
+  mapel_utama text,
+  aktif boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table public.rombel (
   id uuid primary key default gen_random_uuid(),
   sekolah_id bigint not null references public.sekolah(id),
@@ -53,18 +65,6 @@ create table public.rombel (
   aktif boolean not null default true,
   created_at timestamptz not null default now(),
   unique (sekolah_id, tahun_ajaran_id, nama)
-);
-
-create table public.guru (
-  id uuid primary key default gen_random_uuid(),
-  sekolah_id bigint not null references public.sekolah(id),
-  user_id uuid unique references auth.users(id) on delete set null,
-  nip text unique,
-  nama text not null,
-  mapel_utama text,
-  aktif boolean not null default true,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
 );
 
 create table public.siswa (
