@@ -6,48 +6,6 @@
 create extension if not exists pgcrypto;
 
 -- ─────────────────────────────────────────────────────────────────────
--- 0. HELPER FUNCTION
--- ─────────────────────────────────────────────────────────────────────
-
-create or replace function public.current_sekolah_id() returns bigint
-language sql stable
-as $$
-  select id from public.sekolah where aktif = true limit 1
-$$;
-
-create or replace function public.my_peran() returns text
-language sql stable
-as $$
-  select coalesce(auth.jwt() -> 'app_metadata' ->> 'peran', '')
-$$;
-
-create or replace function public.set_updated_at() returns trigger
-language plpgsql as $$
-begin
-  new.updated_at := now();
-  return new;
-end $$;
-
-create or replace function public.set_sekolah_id() returns trigger
-language plpgsql as $$
-begin
-  if new.sekolah_id is null then
-    new.sekolah_id := public.current_sekolah_id();
-  end if;
-  return new;
-end $$;
-
--- ids siswa milik wali yang sedang login
-create or replace function public.siswa_ids_for_wali() returns uuid[]
-language sql stable
-as $$
-  select coalesce(array_agg(ws.siswa_id), '{}')
-  from public.wali_siswa ws
-  join public.wali_murid w on w.id = ws.wali_murid_id
-  where w.user_id = auth.uid()
-$$;
-
--- ─────────────────────────────────────────────────────────────────────
 -- 1. TABEL MASTER
 -- ─────────────────────────────────────────────────────────────────────
 
@@ -275,13 +233,55 @@ create table public.pembayaran (
 );
 
 -- ─────────────────────────────────────────────────────────────────────
+-- 3b. HELPER FUNCTION (dibuat SETELAH tabel — ada referensi tabel)
+-- ─────────────────────────────────────────────────────────────────────
+
+create or replace function public.current_sekolah_id() returns bigint
+language plpgsql stable as $$
+begin
+  return (select id from public.sekolah where aktif = true limit 1);
+end $$;
+
+create or replace function public.my_peran() returns text
+language plpgsql stable as $$
+begin
+  return coalesce(nullif(auth.jwt() -> 'app_metadata' ->> 'peran', ''), '');
+end $$;
+
+-- ids siswa milik wali yang sedang login
+create or replace function public.siswa_ids_for_wali() returns uuid[]
+language plpgsql stable as $$
+begin
+  return coalesce((
+    select array_agg(ws.siswa_id)
+    from public.wali_siswa ws
+    join public.wali_murid w on w.id = ws.wali_murid_id
+    where w.user_id = auth.uid()
+  ), '{}');
+end $$;
+
+create or replace function public.set_updated_at() returns trigger
+language plpgsql as $$
+begin
+  new.updated_at := now();
+  return new;
+end $$;
+
+create or replace function public.set_sekolah_id() returns trigger
+language plpgsql as $$
+begin
+  if new.sekolah_id is null then
+    new.sekolah_id := public.current_sekolah_id();
+  end if;
+  return new;
+end $$;
+
+-- ─────────────────────────────────────────────────────────────────────
 -- 4. TRIGGER
 -- ─────────────────────────────────────────────────────────────────────
 
 create trigger trg_sekolah_upd before update on public.sekolah
   for each row execute function public.set_updated_at();
-create trigger trg_sekolah_id before insert on public.sekolah
-  for each row execute function public.set_sekolah_id();
 create trigger trg_tahun_ajaran_id before insert on public.tahun_ajaran
   for each row execute function public.set_sekolah_id();
 create trigger trg_jurusan_id before insert on public.jurusan
