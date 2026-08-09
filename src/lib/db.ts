@@ -178,3 +178,52 @@ export async function hapusRombel(id: string): Promise<void> {
   const { error } = await supabase.from('rombel').delete().eq('id', id)
   if (error) throw new Error(error.message)
 }
+
+// ── Absensi ───────────────────────────────────────────────────────
+export interface Mapel { id: string; kode: string; nama: string }
+export interface AbsensiRow { id?: string; siswa_id: string; status: string; catatan?: string | null }
+
+export async function listMapel(): Promise<Mapel[]> {
+  const { data } = await supabase.from('mapel').select('id, kode, nama').order('kode')
+  return (data ?? []) as Mapel[]
+}
+
+/** siswa dalam satu rombel (tahun aktif) — untuk grid absen */
+export async function listSiswaRombel(rombelId: string, tahunId: string): Promise<Siswa[]> {
+  const { data } = await supabase
+    .from('rombel_siswa')
+    .select('siswa:siswa(*)')
+    .eq('rombel_id', rombelId).eq('tahun_ajaran_id', tahunId).order('siswa_id')
+  const rows = (data ?? []) as unknown as { siswa: Siswa }[]
+  return rows
+    .map((r) => r.siswa)
+    .sort((a, b) => a.nama.localeCompare(b.nama))
+}
+
+/** nilai absen per-siswa untuk (rombel, mapel, tanggal) */
+export async function listAbsensi(rombelId: string, mapelId: string, tanggal: string): Promise<AbsensiRow[]> {
+  const { data } = await supabase
+    .from('absensi')
+    .select('id, siswa_id, status, catatan')
+    .eq('rombel_id', rombelId).eq('mapel_id', mapelId).eq('tanggal', tanggal)
+  return (data ?? []) as AbsensiRow[]
+}
+
+export async function simpanAbsensi(rows: AbsensiRow[], guruId: string | null): Promise<void> {
+  if (rows.length === 0) return
+  const { error } = await supabase.from('absensi').upsert(
+    rows.map((r) => ({
+      id: r.id, siswa_id: r.siswa_id, status: r.status, catatan: r.catatan ?? null,
+      guru_id: guruId,
+    })), { onConflict: 'siswa_id,tanggal,mapel_id' }
+  )
+  if (error) throw new Error(error.message)
+}
+
+/** id guru dari baris akun user yang login */
+export async function guruIdLogin(): Promise<string | null> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  const { data } = await supabase.from('akun').select('terkait_id').eq('user_id', user.id).maybeSingle()
+  return (data?.terkait_id as string | null) ?? null
+}

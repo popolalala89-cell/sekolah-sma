@@ -11,6 +11,7 @@ import GuruPage from './pages/GuruPage'
 import RombelPage from './pages/RombelPage'
 import JurusanPage from './pages/JurusanPage'
 import WaliPage from './pages/WaliPage'
+import AbsensiPage from './pages/AbsensiPage'
 
 function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -73,8 +74,8 @@ function Shell({ user, peran, children }: { user: User; peran: Peran | null; chi
   )
 }
 
-function Guarded({ peran, children }: { peran: Peran | null; children: React.ReactNode }) {
-  return peran === 'admin' ? <>{children}</> : <Navigate to="/" replace />
+function Guarded({ peran, roles, children }: { peran: Peran | null; roles: Peran[]; children: React.ReactNode }) {
+  return peran && roles.includes(peran) ? <>{children}</> : <Navigate to="/" replace />
 }
 
 function AppRoutes() {
@@ -87,11 +88,12 @@ function AppRoutes() {
     <Shell user={user} peran={peran}>
       <Routes>
         <Route path="/" element={<Dashboard peran={peran} email={user.email} />} />
-        <Route path="/siswa" element={<Guarded peran={peran}><SiswaPage /></Guarded>} />
-        <Route path="/guru" element={<Guarded peran={peran}><GuruPage /></Guarded>} />
-        <Route path="/rombel" element={<Guarded peran={peran}><RombelPage /></Guarded>} />
-        <Route path="/jurusan" element={<Guarded peran={peran}><JurusanPage /></Guarded>} />
-        <Route path="/wali" element={<Guarded peran={peran}><WaliPage /></Guarded>} />
+        <Route path="/siswa" element={<Guarded peran={peran} roles={['admin']}><SiswaPage /></Guarded>} />
+        <Route path="/guru" element={<Guarded peran={peran} roles={['admin']}><GuruPage /></Guarded>} />
+        <Route path="/rombel" element={<Guarded peran={peran} roles={['admin']}><RombelPage /></Guarded>} />
+        <Route path="/jurusan" element={<Guarded peran={peran} roles={['admin']}><JurusanPage /></Guarded>} />
+        <Route path="/wali" element={<Guarded peran={peran} roles={['admin']}><WaliPage /></Guarded>} />
+        <Route path="/absensi" element={<Guarded peran={peran} roles={['admin', 'guru']}><AbsensiPage /></Guarded>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Shell>

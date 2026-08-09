@@ -11,13 +11,14 @@ export default function Dashboard({ peran, email }: { peran: Peran | null; email
         { label: 'Rombel', sub: 'kelas & wali kelas', to: '/rombel', icon: 'meeting_room' },
         { label: 'Jurusan', sub: 'IPA / IPS / BHS', to: '/jurusan', icon: 'category' },
         { label: 'Wali Murid', sub: 'link wali ke anak', to: '/wali', icon: 'family_restroom' },
-        { label: 'Absensi', sub: 'Fase 1.3', to: '/', icon: 'event_available' },
+        { label: 'Absensi', sub: 'input & rekap kehadiran', to: '/absensi', icon: 'event_available' },
         { label: 'Nilai & Rapor', sub: 'Fase 1.4', to: '/', icon: 'scoreboard' },
         { label: 'Jadwal', sub: 'Fase 1.5', to: '/', icon: 'calendar_month' },
         { label: 'Keuangan SPP', sub: 'Fase 1.6', to: '/', icon: 'payments' },
       ]
     : [
         { label: 'Dashboard Saya', sub: peran === 'guru' ? 'Absensi & nilai' : 'Info anak', to: '/', icon: 'dashboard' },
+        ...(peran === 'guru' ? [{ label: 'Absensi', sub: 'input kehadiran', to: '/absensi', icon: 'event_available' }] : []),
       ]
 
   return (

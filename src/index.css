@@ -686,3 +686,22 @@ input, select, textarea { font-family: var(--font); }
   font-size: 14px;
 }
 .checkbox.on { background: var(--primary); border-color: var(--primary); }
+
+/* ── Chip status absen (H/S/I/A/T) ──────────────────────────────── */
+.st-chip {
+  min-width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  border: 1px solid var(--outline);
+  background: transparent;
+  color: var(--on-surface-variant);
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  transition: none;
+}
+.st-chip:active { transform: scale(0.92); }
+.st-chip.on { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
