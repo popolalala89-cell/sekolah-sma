@@ -211,18 +211,21 @@ input, select, textarea { font-family: var(--font); }
   -webkit-backdrop-filter: blur(6px);
 }
 
-/* ── Bottom Navigation (MD3) ───────────────────────────────────── */
+/* ── Bottom Navigation (glass + gradient pill aktif) ───────────── */
 .bottom-nav {
   flex-shrink: 0;
   height: calc(var(--bottom-nav-height) + var(--safe-bottom));
   box-sizing: border-box;
   padding-bottom: var(--safe-bottom);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  border-top: 1px solid var(--outline-variant);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--surface) 48%, transparent) 0%,
+    color-mix(in srgb, var(--surface) 90%, white) 100%);
+  border-top: 1px solid color-mix(in srgb, var(--outline-variant) 55%, transparent);
   display: flex;
   z-index: 1000;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  box-shadow: 0 -2px 14px rgba(30, 20, 80, 0.06);
 }
 .bn-item {
   flex: 1;
@@ -244,20 +247,31 @@ input, select, textarea { font-family: var(--font); }
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 48px;
+  width: 50px;
   height: 30px;
   background: transparent;
   border-radius: 15px;
   pointer-events: none;
-  transition: background 0.18s;
+  transition: background 0.18s, box-shadow 0.18s;
 }
-.bn-item.active::before { background: color-mix(in srgb, var(--primary) 16%, transparent); }
-.bn-item .msym { font-size: 23px; }
-.bn-item.active .msym { font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; color: var(--primary); }
-.bn-item .bn-label {
+.bn-item.active::before {
+  background: var(--grad-brand);
+  box-shadow: 0 2px 8px rgba(67, 85, 214, 0.35);
+}
+.bn-item .msym {
+  font-size: 23px;
+  transition: transform 0.15s;
+}
+.bn-item:active .msym { transform: scale(0.85); }
+.bn-label {
   font-size: 0.62rem;
   font-weight: 500;
   line-height: 1.2;
+  transition: transform 0.15s;
+}
+.bn-item.active .msym {
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  color: #ffffff;
 }
 .bn-item.active .bn-label { color: var(--primary); font-weight: 600; }
 
