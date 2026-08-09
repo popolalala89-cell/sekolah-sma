@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import Papa from 'papaparse'
-import { Link } from 'react-router-dom'
 import {
   listSiswa, simpanSiswa, hapusSiswa, tahunAktifId, listRombel,
   rombelSiswaMap, setRombelSiswa, buatAkunSiswa,
   type Siswa, type Rombel,
 } from '../lib/db'
 import { supabase } from '../lib/supabase'
-import { Modal, useToast, inSel, btn, btnKms, btnDgr } from '../lib/ui'
+import { Modal, Confirm, useToast, inSel, btn, btnTxt } from '../lib/ui'
+import { MIcon } from '../lib/icons'
 
 export default function SiswaPage() {
   const toast = useToast()
@@ -124,128 +124,141 @@ export default function SiswaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <div className="p-4 max-w-5xl mx-auto space-y-4">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <h2 className="text-xl font-semibold text-slate-800">Data Siswa <span className="text-sm text-slate-400 font-normal">({rows.length})</span></h2>
-          <div className="flex gap-2">
-            <button className={btnKms} onClick={() => setCsvOpen(true)}>⬆ Import CSV</button>
-            <button className={btn} onClick={() => { setForm({ gender: 'L' }); setOpen(true) }}>+ Tambah</button>
-          </div>
-        </div>
-        <Link to="/" className="text-blue-600 text-sm">← Dashboard</Link>
-        <input className={inSel + ' max-w-xs'} placeholder="Cari nama / NISN..." value={cari} onChange={(e) => setCari(e.target.value)} />
+    <div className="page-wrap">
+      <h1 className="page-title">Data Siswa <span style={{ color: 'var(--on-surface-variant)', fontSize: '0.9rem', fontWeight: 400 }}>({rows.length})</span></h1>
+      <p className="page-sub">Master data & akun login siswa</p>
 
-        <div className="bg-white rounded-xl shadow divide-y">
-          {busy ? <p className="p-4 text-sm text-slate-400">Memuat...</p> : tampil.length === 0 ? (
-            <p className="p-4 text-sm text-slate-400">Belum ada siswa</p>
-          ) : tampil.map((s) => (
-            <div key={s.id} className="p-3 flex items-center justify-between gap-2 flex-wrap">
-              <div>
-                <div className="font-medium text-slate-800">{s.nama}
-                  {s.gender && <span className={`ml-2 text-[10px] px-2 py-0.5 rounded ${s.gender === 'L' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>{s.gender}</span>}
+      <div className="search-wrap">
+        <MIcon n="search" />
+        <input placeholder="Cari nama / NISN..." value={cari} onChange={(e) => setCari(e.target.value)} />
+      </div>
+
+      <div className="chips">
+        <button className="chip" onClick={() => setCsvOpen(true)}><MIcon n="upload_file" /> Import CSV</button>
+      </div>
+
+      <div className="card" style={{ padding: 0 }}>
+        {busy ? <p className="empty">Memuat...</p> : tampil.length === 0 ? (
+          <div className="empty"><MIcon n="groups" /><p>{cari ? 'Tidak ada hasil' : 'Belum ada siswa'}</p></div>
+        ) : tampil.map((s, i) => (
+          <div key={s.id}>
+            {i > 0 && <div className="list-divider" />}
+            <div className="list-item">
+              <div className="li-avatar">{s.nama.charAt(0)}</div>
+              <div className="li-body">
+                <div className="li-title">
+                  {s.nama}
+                  {s.gender && <span className={`badge ${s.gender === 'L' ? '' : 'error'}`} style={{ marginLeft: 8, background: s.gender === 'L' ? 'var(--secondary-container)' : 'var(--error-container)', color: s.gender === 'L' ? 'var(--on-secondary-container)' : 'var(--on-error-container)' }}>{s.gender}</span>}
                 </div>
-                <div className="text-xs text-slate-400 mt-0.5">
+                <div className="li-sub">
                   {s.nisn} · {namaRombelMap.get(s.id) ?? 'belum dirombel'} · {s.user_id ? 'akun ada' : 'belum ada akun'}
                 </div>
               </div>
-              <div className="flex gap-2 flex-wrap">
-                {!s.user_id && <button className={btn} onClick={() => buatAkun(s)}>Buat Akun</button>}
-                <button className={btnKms} onClick={() => { setForm({ ...s, rombel_id: rMap.get(s.id) }); setOpen(true) }}>Edit</button>
-                <button className={btnDgr} onClick={() => setHapusId(s.id)}>Hapus</button>
+              <div className="li-trailing">
+                {!s.user_id && (
+                  <button className="btn btn-sm" onClick={() => buatAkun(s)} title="Buat akun login">
+                    <MIcon n="person_add" />
+                  </button>
+                )}
+                <button className="icon-btn" title="Edit" onClick={() => { setForm({ ...s, rombel_id: rMap.get(s.id) }); setOpen(true) }}><MIcon n="edit" /></button>
+                <button className="icon-btn" title="Hapus" onClick={() => setHapusId(s.id)}><MIcon n="delete" /></button>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
+      <button className="fab" title="Tambah siswa" onClick={() => { setForm({ gender: 'L' }); setOpen(true) }}>
+        <MIcon n="add" />
+      </button>
+
       <Modal open={open} onClose={() => setOpen(false)} title={form.id ? 'Edit Siswa' : 'Siswa Baru'} wide>
-        <div className="grid grid-cols-2 gap-3">
-          <label className="block text-sm col-span-1">
-            <span className="text-slate-600">NISN *</span>
-            <input className={inSel + ' mt-1'} value={form.nisn ?? ''} onChange={(e) => setForm({ ...form, nisn: e.target.value })} />
-          </label>
-          <label className="block text-sm col-span-1">
-            <span className="text-slate-600">Nama lengkap *</span>
-            <input className={inSel + ' mt-1'} value={form.nama ?? ''} onChange={(e) => setForm({ ...form, nama: e.target.value })} />
-          </label>
-          <label className="block text-sm">
-            <span className="text-slate-600">Gender</span>
-            <select className={inSel + ' mt-1'} value={form.gender ?? 'L'} onChange={(e) => setForm({ ...form, gender: e.target.value as 'L' | 'P' })}>
+        <div className="form-grid">
+          <div className="field">
+            <span>NISN *</span>
+            <input className={inSel} value={form.nisn ?? ''} onChange={(e) => setForm({ ...form, nisn: e.target.value })} />
+          </div>
+          <div className="field">
+            <span>Nama lengkap *</span>
+            <input className={inSel} value={form.nama ?? ''} onChange={(e) => setForm({ ...form, nama: e.target.value })} />
+          </div>
+          <div className="field">
+            <span>Gender</span>
+            <select className={inSel} value={form.gender ?? 'L'} onChange={(e) => setForm({ ...form, gender: e.target.value as 'L' | 'P' })}>
               <option value="L">Laki-laki</option>
               <option value="P">Perempuan</option>
             </select>
-          </label>
-          <label className="block text-sm">
-            <span className="text-slate-600">Rombel (tahun aktif)</span>
-            <select className={inSel + ' mt-1'} value={form.rombel_id ?? ''} onChange={(e) => setForm({ ...form, rombel_id: e.target.value || undefined })}>
+          </div>
+          <div className="field">
+            <span>Rombel (tahun aktif)</span>
+            <select className={inSel} value={form.rombel_id ?? ''} onChange={(e) => setForm({ ...form, rombel_id: e.target.value || undefined })}>
               <option value="">— tanpa rombel —</option>
               {rombels.map((r) => <option key={r.id} value={r.id}>{r.nama}</option>)}
             </select>
-          </label>
-          <label className="block text-sm">
-            <span className="text-slate-600">Tempat lahir</span>
-            <input className={inSel + ' mt-1'} value={form.tempat_lahir ?? ''} onChange={(e) => setForm({ ...form, tempat_lahir: e.target.value })} />
-          </label>
-          <label className="block text-sm">
-            <span className="text-slate-600">Tanggal lahir</span>
-            <input type="date" className={inSel + ' mt-1'} value={form.tgl_lahir ?? ''} onChange={(e) => setForm({ ...form, tgl_lahir: e.target.value })} />
-          </label>
-          <label className="block text-sm">
-            <span className="text-slate-600">Angkatan</span>
-            <input type="number" className={inSel + ' mt-1'} value={form.angkatan ?? ''} onChange={(e) => setForm({ ...form, angkatan: e.target.value ? Number(e.target.value) : null })} />
-          </label>
-          <label className="block text-sm">
-            <span className="text-slate-600">Telepon</span>
-            <input className={inSel + ' mt-1'} value={form.telepon ?? ''} onChange={(e) => setForm({ ...form, telepon: e.target.value })} />
-          </label>
-          <label className="block text-sm col-span-2">
-            <span className="text-slate-600">Alamat</span>
-            <input className={inSel + ' mt-1'} value={form.alamat ?? ''} onChange={(e) => setForm({ ...form, alamat: e.target.value })} />
-          </label>
+          </div>
+          <div className="field">
+            <span>Tempat lahir</span>
+            <input className={inSel} value={form.tempat_lahir ?? ''} onChange={(e) => setForm({ ...form, tempat_lahir: e.target.value })} />
+          </div>
+          <div className="field">
+            <span>Tanggal lahir</span>
+            <input type="date" className={inSel} value={form.tgl_lahir ?? ''} onChange={(e) => setForm({ ...form, tgl_lahir: e.target.value })} />
+          </div>
+          <div className="field">
+            <span>Angkatan</span>
+            <input type="number" className={inSel} value={form.angkatan ?? ''} onChange={(e) => setForm({ ...form, angkatan: e.target.value ? Number(e.target.value) : null })} />
+          </div>
+          <div className="field">
+            <span>Telepon</span>
+            <input className={inSel} value={form.telepon ?? ''} onChange={(e) => setForm({ ...form, telepon: e.target.value })} />
+          </div>
+          <div className="field span2">
+            <span>Alamat</span>
+            <input className={inSel} value={form.alamat ?? ''} onChange={(e) => setForm({ ...form, alamat: e.target.value })} />
+          </div>
         </div>
-        <div className="flex gap-2 justify-end pt-4">
-          <button className={btnKms} onClick={() => setOpen(false)}>Batal</button>
+        <div className="modal-actions">
+          <button className={btnTxt} onClick={() => setOpen(false)}>Batal</button>
           <button className={btn} onClick={simpan}>Simpan</button>
         </div>
       </Modal>
 
       <Modal open={csvOpen} onClose={() => setCsvOpen(false)} title="Import CSV" wide>
-        <p className="text-xs text-slate-500 mb-3">
-          Kolom yang didukung: <code className="bg-slate-100 px-1 rounded">nisn*, nama*, gender (L/P), tempat_lahir, tgl_lahir (YYYY-MM-DD), alamat, telepon, angkatan</code>
+        <p style={{ fontSize: '0.78rem', color: 'var(--on-surface-variant)', marginBottom: 12 }}>
+          Kolom didukung: <code style={{ background: 'var(--surface-container-high)', padding: '2px 6px', borderRadius: 6 }}>nisn*, nama*, gender (L/P), tempat_lahir, tgl_lahir (YYYY-MM-DD), alamat, telepon, angkatan</code>
         </p>
-        <input type="file" accept=".csv,text/csv" className="text-sm mb-3" onChange={(e) => pilihCSV(e.target.files?.[0] ?? null)} />
+        <input type="file" accept=".csv,text/csv" style={{ fontSize: '0.85rem', marginBottom: 12 }}
+          onChange={(e) => pilihCSV(e.target.files?.[0] ?? null)} />
         {csvPreview.length > 0 && (
           <>
-            <div className="text-xs text-slate-500 mb-1">Pratinjau {csvPreview.length} baris pertama (total {csvRows.length}):</div>
-            <div className="overflow-auto border rounded-lg mb-3">
-              <table className="text-xs w-full">
-                <thead><tr className="bg-slate-50 text-left">
-                  {Object.keys(csvPreview[0] ?? {}).map((k) => <th key={k} className="px-2 py-1 font-medium">{k}</th>)}
+            <div style={{ fontSize: '0.78rem', color: 'var(--on-surface-variant)', marginBottom: 6 }}>
+              Pratinjau {csvPreview.length} baris pertama (total {csvRows.length}):
+            </div>
+            <div style={{ overflowX: 'auto', border: '1px solid var(--outline-variant)', borderRadius: 12, marginBottom: 14 }}>
+              <table style={{ fontSize: '0.75rem', width: '100%', borderCollapse: 'collapse' }}>
+                <thead><tr style={{ background: 'var(--surface-container)', textAlign: 'left' }}>
+                  {Object.keys(csvPreview[0] ?? {}).map((k) => <th key={k} style={{ padding: '6px 10px', fontWeight: 600 }}>{k}</th>)}
                 </tr></thead>
                 <tbody>
                   {csvPreview.map((r, i) => (
-                    <tr key={i} className="border-t">
-                      {Object.values(r).map((v, j) => <td key={j} className="px-2 py-1">{v}</td>)}
+                    <tr key={i} style={{ borderTop: '1px solid var(--outline-variant)' }}>
+                      {Object.values(r).map((v, j) => <td key={j} style={{ padding: '6px 10px' }}>{v}</td>)}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <button className={btn} disabled={sedangImport} onClick={imporCSV}>
-              {sedangImport ? 'Mengimpor...' : `Import ${csvRows.length} siswa`}
-            </button>
+            <div className="modal-actions">
+              <button className={btn} disabled={sedangImport} onClick={imporCSV}>
+                {sedangImport ? 'Mengimpor...' : `Import ${csvRows.length} siswa`}
+              </button>
+            </div>
           </>
         )}
       </Modal>
 
-      <Modal open={!!hapusId} onClose={() => setHapusId(null)} title="Konfirmasi Hapus">
-        <p className="text-sm text-slate-600 mb-4">Hapus siswa ini? Nilai, absensi, dan tagihan terkait ikut terhapus.</p>
-        <div className="flex gap-2 justify-end">
-          <button className={btnKms} onClick={() => setHapusId(null)}>Batal</button>
-          <button className={btnDgr} onClick={hapus}>Ya, hapus</button>
-        </div>
-      </Modal>
+      <Confirm open={!!hapusId} onClose={() => setHapusId(null)} onYes={hapus}
+        title="Hapus siswa?" desc="Nilai, absensi, dan tagihan terkait ikut terhapus." />
     </div>
   )
 }

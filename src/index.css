@@ -1,1 +1,672 @@
-@import "tailwindcss";
+/* ═══════════════════════════════════════════════════════════════
+   SEKOLAH-SMA — Material 3 Design System (mobile-first, lokal)
+   Font & ikon 100% lokal (tanpa CDN) — Poppins + Material Symbols
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Font vendor lokal ─────────────────────────────────────────── */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/Poppins-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./assets/fonts/Poppins-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./assets/fonts/Poppins-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./assets/fonts/Poppins-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('./assets/fonts/MaterialSymbols-sub.woff2') format('woff2');
+}
+
+/* ── Design tokens MD3 (seed: biru sekolah) ────────────────────── */
+:root {
+  --primary: #2e5ca8;
+  --on-primary: #ffffff;
+  --primary-container: #d8e2ff;
+  --on-primary-container: #001946;
+  --secondary: #565e71;
+  --on-secondary: #ffffff;
+  --secondary-container: #dae2f9;
+  --on-secondary-container: #131c2b;
+  --tertiary: #715573;
+  --surface: #fdfbff;
+  --surface-dim: #dddbe0;
+  --surface-container: #f1f0f4;
+  --surface-container-high: #ebeaf0;
+  --on-surface: #1a1c20;
+  --on-surface-variant: #44474f;
+  --outline: #74777f;
+  --outline-variant: #c4c6d0;
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --error-container: #ffdad6;
+  --on-error-container: #410002;
+  --success: #2e7d32;
+  --success-container: #b7f2bd;
+  --on-success-container: #002107;
+
+  --topbar-height: 56px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --bottom-nav-height: 64px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  --elev-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+  --elev-2: 0 2px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+  --elev-3: 0 6px 20px rgba(0, 0, 0, 0.16), 0 2px 8px rgba(0, 0, 0, 0.12);
+
+  --font: 'Poppins', 'Roboto', system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--surface);
+  color: var(--on-surface);
+  min-height: 100dvh;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font-family: var(--font); cursor: pointer; touch-action: manipulation; }
+input, select, textarea { font-family: var(--font); }
+
+/* ── Ikon Material Symbols ─────────────────────────────────────── */
+.msym {
+  font-family: 'Material Symbols Outlined';
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+}
+.msym.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+.msym.sm { font-size: 20px; }
+.msym.xs { font-size: 18px; }
+
+/* ── Layout aplikasi: flex column, scroll di dalam (anti fixed-nav bug) ── */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+.app-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  min-height: 0;
+}
+
+/* ── Top App Bar (standard 56px) ───────────────────────────────── */
+.top-app-bar {
+  flex-shrink: 0;
+  height: calc(var(--topbar-height) + var(--safe-top));
+  box-sizing: content-box;
+  padding-top: var(--safe-top);
+  background: var(--surface);
+  color: var(--on-surface);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 8px;
+  padding-right: 12px;
+  border-bottom: 1px solid var(--outline-variant);
+  position: relative;
+  z-index: 1100;
+}
+.top-app-bar .bar-title {
+  flex: 1;
+  font-size: 1.15rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.top-app-bar .bar-sub {
+  font-size: 0.68rem;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-top: -2px;
+}
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-full);
+  color: var(--on-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.icon-btn:active { background: color-mix(in srgb, var(--on-surface) 10%, transparent); }
+
+/* avatar bulat kecil di app bar */
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* ── Bottom Navigation (MD3) ───────────────────────────────────── */
+.bottom-nav {
+  flex-shrink: 0;
+  height: calc(var(--bottom-nav-height) + var(--safe-bottom));
+  box-sizing: border-box;
+  padding-bottom: var(--safe-bottom);
+  background: var(--surface);
+  border-top: 1px solid var(--outline-variant);
+  display: flex;
+  z-index: 1000;
+}
+.bn-item {
+  flex: 1;
+  max-width: 96px;
+  margin: 0 auto;
+  border: none;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--on-surface-variant);
+  position: relative;
+}
+.bn-item::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 30px;
+  background: transparent;
+  border-radius: 15px;
+  pointer-events: none;
+}
+.bn-item.active::before { background: color-mix(in srgb, var(--primary) 14%, transparent); }
+.bn-item .msym { font-size: 23px; }
+.bn-item.active .msym { font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; color: var(--primary); }
+.bn-item .bn-label {
+  font-size: 0.62rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.bn-item.active .bn-label { color: var(--primary); font-weight: 600; }
+
+/* ── Halaman & konten ──────────────────────────────────────────── */
+.page-wrap {
+  padding: 16px 16px calc(16px + var(--safe-bottom));
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+  animation: fadeUp 0.22s ease;
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 4px 0 2px;
+}
+.page-sub { font-size: 0.82rem; color: var(--on-surface-variant); margin-bottom: 16px; }
+
+/* ── Card & list MD3 ───────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  box-shadow: none;
+}
+.card.flat { box-shadow: none; }
+.card-touch { transition: transform 0.12s ease, background 0.15s; }
+.card-touch:active { background: var(--surface-container-high); transform: scale(0.985); }
+
+.list-divider { height: 1px; background: var(--outline-variant); margin: 0 16px; }
+
+/* List item MD3 (avatar kiri + dua baris teks + trailing) */
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  min-height: 56px;
+}
+.list-item .li-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.list-item .li-body { flex: 1; min-width: 0; }
+.list-item .li-title {
+  font-size: 0.92rem;
+  font-weight: 550;
+  color: var(--on-surface);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.list-item .li-sub {
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.list-item .li-trailing { flex-shrink: 0; display: flex; gap: 6px; align-items: center; }
+
+/* Badge kecil */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
+  white-space: nowrap;
+}
+.badge.primary { background: var(--primary); color: var(--on-primary); }
+.badge.success { background: var(--success-container); color: var(--on-success-container); }
+.badge.error { background: var(--error-container); color: var(--on-error-container); }
+.badge.outline { background: transparent; border: 1px solid var(--outline); color: var(--on-surface-variant); }
+
+/* ── Tombol MD3 ────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 0 24px;
+  height: 44px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: none;
+  position: relative;
+  overflow: hidden;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-fill { background: var(--primary); color: var(--on-primary); }
+.btn-fill:active { background: color-mix(in srgb, var(--primary) 85%, black); }
+.btn-tonal { background: var(--secondary-container); color: var(--on-secondary-container); }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--outline);
+  color: var(--primary);
+  padding: 0 22px;
+  height: 42px;
+}
+.btn-text { background: transparent; color: var(--primary); padding: 0 12px; }
+.btn-error { background: var(--error); color: var(--on-error); }
+.btn-error:active { background: color-mix(in srgb, var(--error) 85%, black); }
+.btn-block { width: 100%; }
+.btn-sm { height: 36px; padding: 0 16px; font-size: 0.8rem; border-radius: var(--radius-full); }
+
+/* ── FAB ───────────────────────────────────────────────────────── */
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 20px);
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  box-shadow: var(--elev-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+  transition: transform 0.12s, box-shadow 0.2s;
+}
+.fab:active { transform: scale(0.9); }
+.fab.extended {
+  width: auto;
+  padding: 0 20px;
+  gap: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+}
+
+/* ── Input / select (text field MD3 ala filled) ────────────────── */
+.field { margin-bottom: 18px; }
+.field > span {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--on-surface-variant);
+  margin-bottom: 6px;
+}
+.inp, .sel, .txt {
+  width: 100%;
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--on-surface);
+  padding: 12px 14px;
+  font-size: 0.92rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+.inp:focus, .sel:focus, .txt:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+.inp::placeholder { color: var(--outline); }
+.sel { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2344474f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 38px; }
+
+/* ── Search bar MD3 ────────────────────────────────────────────── */
+.search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-container-high);
+  border-radius: var(--radius-full);
+  padding: 0 16px;
+  height: 46px;
+  margin-bottom: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.search-wrap .msym { color: var(--on-surface-variant); font-size: 21px; flex-shrink: 0; }
+.search-wrap input {
+  flex: 1;
+  min-width: 0;
+  width: 0;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  color: var(--on-surface);
+  outline: none;
+  height: 100%;
+}
+.search-wrap input::placeholder { color: var(--on-surface-variant); }
+
+/* ── Chips MD3 ─────────────────────────────────────────────────── */
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+  margin-bottom: 12px;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid var(--outline-variant);
+  background: var(--surface);
+  color: var(--on-surface-variant);
+  border-radius: var(--radius-full);
+  padding: 0 14px;
+  height: 32px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  transition: none;
+}
+.chip:active { transform: scale(0.96); }
+.chip.active {
+  background: var(--secondary-container);
+  border-color: transparent;
+  color: var(--on-secondary-container);
+  font-weight: 600;
+}
+.chip .msym { font-size: 17px; }
+
+/* ── Badge counter di app-bar ──────────────────────────────────── */
+.cnt-chip {
+  background: var(--error);
+  color: var(--on-error);
+  font-size: 0.66rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+/* ── Modal MD3 (bottom sheet + dialog) ─────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1400;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: ov-in 0.18s ease;
+}
+@keyframes ov-in { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-sheet {
+  background: var(--surface);
+  width: 100%;
+  max-width: 560px;
+  max-height: 88dvh;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: 12px 20px calc(20px + var(--safe-bottom));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  animation: sheet-up 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--elev-3);
+}
+@keyframes sheet-up { from { transform: translateY(60px); opacity: 0.6; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-grip {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--outline-variant);
+  margin: 4px auto 10px;
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--outline-variant);
+}
+.modal-head h3 { font-size: 1.05rem; font-weight: 650; }
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+/* ── Snackbar/toast ────────────────────────────────────────────── */
+.toast-stack {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 14px);
+  z-index: 2000;
+  width: calc(100% - 40px);
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--on-surface);
+  color: var(--surface);
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--elev-3);
+  animation: toast-in 0.22s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toast .msym { font-size: 20px; color: var(--success-container); }
+.toast.err .msym { color: #ffb4ab; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Login ─────────────────────────────────────────────────────── */
+.login-screen {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(120% 60% at 50% -10%, var(--primary-container) 0%, transparent 60%),
+    var(--surface);
+}
+.login-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: var(--primary);
+  color: var(--on-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  box-shadow: var(--elev-3);
+}
+.login-title { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.01em; }
+.login-sub { font-size: 0.8rem; color: var(--on-surface-variant); margin: 2px 0 24px; }
+.login-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--elev-1);
+}
+
+/* ── Empty state ───────────────────────────────────────────────── */
+.empty {
+  text-align: center;
+  padding: 36px 16px;
+  color: var(--on-surface-variant);
+}
+.empty .msym { font-size: 44px; opacity: 0.4; margin-bottom: 8px; }
+.empty p { font-size: 0.85rem; }
+
+/* ── Form grid 2 kolom (bottom sheet) ──────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 14px;
+}
+.form-grid .span2 { grid-column: 1 / -1; }
+@media (max-width: 420px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Grid dashboard ────────────────────────────────────────────── */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (min-width: 560px) { .menu-grid { grid-template-columns: repeat(3, 1fr); } }
+.menu-tile {
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  padding: 16px 14px;
+  text-decoration: none;
+  color: inherit;
+  transition: none;
+}
+.menu-tile:active { background: var(--surface-container-high); transform: scale(0.97); }
+.menu-tile .mt-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.menu-tile .mt-label { font-size: 0.88rem; font-weight: 600; line-height: 1.25; }
+.menu-tile .mt-sub { font-size: 0.7rem; color: var(--on-surface-variant); margin-top: 2px; }
+
+@media (min-width: 600px) {
+  .page-wrap { max-width: 820px; }
+}

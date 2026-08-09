@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { listGuru, simpanGuru, hapusGuru, type Guru } from '../lib/db'
-import { Modal, useToast, inSel, btn, btnKms, btnDgr } from '../lib/ui'
-import { Link } from 'react-router-dom'
+import { Modal, Confirm, useToast, inSel, btn } from '../lib/ui'
+import { MIcon } from '../lib/icons'
 
 export default function GuruPage() {
   const toast = useToast()
@@ -34,58 +34,59 @@ export default function GuruPage() {
   }
 
   const F = ({ k, label, ph }: { k: keyof Guru; label: string; ph?: string }) => (
-    <label className="block text-sm">
-      <span className="text-slate-600">{label}</span>
-      <input className={inSel + ' mt-1'} value={form[k] ?? ''}
+    <div className="field">
+      <span>{label}</span>
+      <input className={inSel} value={(form[k] as string) ?? ''}
         onChange={(e) => setForm({ ...form, [k]: e.target.value })} placeholder={ph} />
-    </label>
+    </div>
   )
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <div className="p-4 max-w-3xl mx-auto space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-slate-800">Data Guru</h2>
-          <button className={btn} onClick={() => { setForm({}); setOpen(true) }}>+ Tambah</button>
-        </div>
-        <Link to="/" className="text-sm text-blue-600">← Dashboard</Link>
-        <div className="bg-white rounded-xl shadow divide-y">
-          {busy ? <p className="p-4 text-sm text-slate-400">Memuat...</p> : rows.length === 0 ? (
-            <p className="p-4 text-sm text-slate-400">Belum ada guru</p>
-          ) : rows.map((g) => (
-            <div key={g.id} className="p-3 flex items-center justify-between">
-              <div>
-                <div className="font-medium text-slate-800">{g.nama}</div>
-                <div className="text-xs text-slate-400">{g.nip ?? '-'} · {g.mapel_utama ?? '-'}</div>
+    <div className="page-wrap">
+      <h1 className="page-title">Data Guru <span style={{ color: 'var(--on-surface-variant)', fontWeight: 400, fontSize: '0.9rem' }}>({rows.length})</span></h1>
+      <p className="page-sub">Profil tenaga pendidik</p>
+
+      <div className="card" style={{ padding: 0 }}>
+        {busy ? <p className="empty">Memuat...</p> : rows.length === 0 ? (
+          <div className="empty"><MIcon n="school" /><p>Belum ada guru</p></div>
+        ) : rows.map((g, i) => (
+          <div key={g.id}>
+            {i > 0 && <div className="list-divider" />}
+            <div className="list-item">
+              <div className="li-avatar">{g.nama.charAt(0)}</div>
+              <div className="li-body">
+                <div className="li-title">{g.nama}</div>
+                <div className="li-sub">{g.nip ?? '-'} · {g.mapel_utama ?? '-'}</div>
               </div>
-              <div className="flex gap-2">
-                <button className={btnKms} onClick={() => { setForm(g); setOpen(true) }}>Edit</button>
-                <button className={btnDgr} onClick={() => setHapusId(g.id)}>Hapus</button>
+              <div className="li-trailing">
+                <button className="icon-btn" title="Edit" onClick={() => { setForm(g); setOpen(true) }}>
+                  <MIcon n="edit" />
+                </button>
+                <button className="icon-btn" title="Hapus" onClick={() => setHapusId(g.id)}>
+                  <MIcon n="delete" />
+                </button>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
-      <Modal open={open} onClose={() => setOpen(false)} title={form.id ? 'Edit Guru' : 'Guru Baru'}>
-        <div className="space-y-3">
-          <F k="nama" label="Nama lengkap" />
-          <F k="nip" label="NIP" />
-          <F k="mapel_utama" label="Mapel utama" />
-          <div className="flex gap-2 justify-end pt-2">
-            <button className={btnKms} onClick={() => setOpen(false)}>Batal</button>
-            <button className={btn} onClick={simpan}>Simpan</button>
-          </div>
+      <button className="fab" title="Tambah guru" onClick={() => { setForm({}); setOpen(true) }}>
+        <MIcon n="add" />
+      </button>
+
+      <Modal open={open} onClose={() => setOpen(false)} title={form.id ? 'Edit Guru' : 'Tambah Guru'}>
+        <F k="nama" label="Nama lengkap" />
+        <F k="nip" label="NIP" />
+        <F k="mapel_utama" label="Mapel utama" />
+        <div className="modal-actions">
+          <button className="btn btn-text" onClick={() => setOpen(false)}>Batal</button>
+          <button className={btn} onClick={simpan}>Simpan</button>
         </div>
       </Modal>
 
-      <Modal open={!!hapusId} onClose={() => setHapusId(null)} title="Konfirmasi Hapus">
-        <p className="text-sm text-slate-600 mb-4">Hapus guru ini? Tindakan tidak bisa dibatalkan.</p>
-        <div className="flex gap-2 justify-end">
-          <button className={btnKms} onClick={() => setHapusId(null)}>Batal</button>
-          <button className={btnDgr} onClick={hapus}>Ya, hapus</button>
-        </div>
-      </Modal>
+      <Confirm open={!!hapusId} onClose={() => setHapusId(null)} onYes={hapus}
+        title="Hapus guru?" desc="Tindakan tidak bisa dibatalkan." />
     </div>
   )
 }

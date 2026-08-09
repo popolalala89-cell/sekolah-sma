@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { btn } from '../lib/ui'
+import { btn, inSel } from '../lib/ui'
+import { MIcon } from '../lib/icons'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -19,18 +20,25 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100">
-      <form onSubmit={masuk} className="bg-white rounded-2xl shadow-lg p-8 w-80 space-y-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-800">SekolahSMA</h1>
-          <p className="text-sm text-slate-500 mt-1">Sistem Informasi Sekolah</p>
+    <div className="login-screen">
+      <div className="login-logo">
+        <MIcon n="school" />
+      </div>
+      <h1 className="login-title">SekolahSMA</h1>
+      <p className="login-sub">Sistem Informasi Sekolah</p>
+      <form onSubmit={masuk} className="login-card">
+        <div className="field">
+          <span>Email</span>
+          <input className={inSel} type="email" required placeholder="nama@sekolah.local" autoComplete="email"
+            value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
-        <input className="w-full border rounded-lg px-3 py-2 text-sm" type="email" required placeholder="Email"
-          value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input className="w-full border rounded-lg px-3 py-2 text-sm" type="password" required placeholder="Password"
-          value={password} onChange={(e) => setPassword(e.target.value)} />
-        {err && <p className="text-red-600 text-xs">{err}</p>}
-        <button disabled={busy} className={btn + ' w-full'}>{busy ? 'Masuk...' : 'Masuk'}</button>
+        <div className="field">
+          <span>Password</span>
+          <input className={inSel} type="password" required placeholder="••••••••" autoComplete="current-password"
+            value={password} onChange={(e) => setPassword(e.target.value)} />
+        </div>
+        {err && <p style={{ color: 'var(--error)', fontSize: '0.78rem', marginBottom: 10 }}>{err}</p>}
+        <button disabled={busy} className={btn + ' btn-block'}>{busy ? 'Masuk...' : 'Masuk'}</button>
       </form>
     </div>
   )

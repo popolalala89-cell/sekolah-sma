@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import type { User } from '@supabase/supabase-js'
 import { supabase, peranDariUser, type Peran } from './lib/supabase'
 import { ToastProvider } from './lib/ui'
+import { MIcon } from './lib/icons'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import SiswaPage from './pages/SiswaPage'
@@ -26,27 +27,80 @@ function useAuth() {
   return { user, loading }
 }
 
-function Protected({ peran, children }: { peran: Peran | null; children: React.ReactNode }) {
+const NAV = [
+  { to: '/', label: 'Beranda', icon: 'home' },
+  { to: '/siswa', label: 'Siswa', icon: 'groups' },
+  { to: '/guru', label: 'Guru', icon: 'school' },
+  { to: '/rombel', label: 'Rombel', icon: 'meeting_room' },
+  { to: '/jurusan', label: 'Jurusan', icon: 'category' },
+]
+
+const JUDUL: Record<string, string> = {
+  '/': 'Beranda', '/siswa': 'Data Siswa', '/guru': 'Data Guru',
+  '/rombel': 'Rombel', '/jurusan': 'Jurusan',
+}
+
+function Shell({ user, peran, children }: { user: User; peran: Peran | null; children: React.ReactNode }) {
+  const loc = useLocation()
+  const active = NAV.find((n) => n.to === loc.pathname)
+  return (
+    <div className="app-layout">
+      <header className="top-app-bar">
+        <span className="bar-title">{active?.label ?? JUDUL[loc.pathname] ?? 'SekolahSMA'}</span>
+        <span className="avatar">{user.email ? user.email.charAt(0).toUpperCase() : '?'}</span>
+        <button className="icon-btn" title="Keluar" onClick={() => supabase.auth.signOut()}>
+          <MIcon n="logout" />
+        </button>
+      </header>
+
+      <div className="app-scroll">{children}</div>
+
+      {peran === 'admin' && (
+        <nav className="bottom-nav">
+          {NAV.map((n) => {
+            const isActive = loc.pathname === n.to
+            return (
+              <a key={n.to} href={`#${n.to}`} className={`bn-item${isActive ? ' active' : ''}`}>
+                <MIcon n={n.icon} />
+                <span className="bn-label">{n.label}</span>
+              </a>
+            )
+          })}
+        </nav>
+      )}
+    </div>
+  )
+}
+
+function Guarded({ peran, children }: { peran: Peran | null; children: React.ReactNode }) {
   return peran === 'admin' ? <>{children}</> : <Navigate to="/" replace />
 }
 
-export default function App() {
+function AppRoutes() {
   const { user, loading } = useAuth()
-  if (loading) return <div className="min-h-screen grid place-items-center text-slate-500">Memuat...</div>
+  if (loading) return <div className="login-screen" style={{ fontSize: '0.9rem', color: 'var(--on-surface-variant)' }}>Memuat...</div>
   const peran = peranDariUser(user)
 
+  if (!user) return <Login />
+  return (
+    <Shell user={user} peran={peran}>
+      <Routes>
+        <Route path="/" element={<Dashboard peran={peran} email={user.email} />} />
+        <Route path="/siswa" element={<Guarded peran={peran}><SiswaPage /></Guarded>} />
+        <Route path="/guru" element={<Guarded peran={peran}><GuruPage /></Guarded>} />
+        <Route path="/rombel" element={<Guarded peran={peran}><RombelPage /></Guarded>} />
+        <Route path="/jurusan" element={<Guarded peran={peran}><JurusanPage /></Guarded>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Shell>
+  )
+}
+
+export default function App() {
   return (
     <ToastProvider>
       <HashRouter>
-        <Routes>
-          <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-          <Route path="/" element={user ? <Dashboard peran={peran} email={user.email} /> : <Navigate to="/login" replace />} />
-          <Route path="/siswa" element={user ? <Protected peran={peran}><SiswaPage /></Protected> : <Navigate to="/login" replace />} />
-          <Route path="/guru" element={user ? <Protected peran={peran}><GuruPage /></Protected> : <Navigate to="/login" replace />} />
-          <Route path="/rombel" element={user ? <Protected peran={peran}><RombelPage /></Protected> : <Navigate to="/login" replace />} />
-          <Route path="/jurusan" element={user ? <Protected peran={peran}><JurusanPage /></Protected> : <Navigate to="/login" replace />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <AppRoutes />
       </HashRouter>
     </ToastProvider>
   )

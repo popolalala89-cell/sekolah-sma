@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { listJurusan, simpanJurusan, hapusJurusan, type Jurusan } from '../lib/db'
-import { Modal, useToast, inSel, btn, btnKms, btnDgr } from '../lib/ui'
-import { Link } from 'react-router-dom'
+import { Modal, Confirm, useToast, inSel, btn } from '../lib/ui'
+import { MIcon } from '../lib/icons'
 
 export default function JurusanPage() {
   const toast = useToast()
@@ -27,57 +27,53 @@ export default function JurusanPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <div className="p-4 max-w-2xl mx-auto space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-slate-800">Jurusan</h2>
-          <button className={btn} onClick={() => { setForm({}); setOpen(true) }}>+ Tambah</button>
-        </div>
-        <Link to="/" className="text-blue-600 text-sm">← Dashboard</Link>
-        <div className="bg-white rounded-xl shadow divide-y">
-          {rows.length === 0 ? (
-            <p className="p-4 text-sm text-slate-400">Belum ada jurusan</p>
-          ) : rows.map((j) => (
-            <div key={j.id} className="p-3 flex items-center justify-between">
-              <div>
-                <span className="inline-block bg-blue-100 text-blue-700 text-xs font-mono rounded px-2 py-0.5 mr-2">{j.kode}</span>
-                <span className="text-slate-800">{j.nama}</span>
+    <div className="page-wrap">
+      <h1 className="page-title">Jurusan <span style={{ color: 'var(--on-surface-variant)', fontSize: '0.9rem', fontWeight: 400 }}>({rows.length})</span></h1>
+      <p className="page-sub">Penjurusan IPA / IPS / Bahasa</p>
+
+      <div className="card" style={{ padding: 0 }}>
+        {rows.length === 0 ? (
+          <div className="empty"><MIcon n="category" /><p>Belum ada jurusan</p></div>
+        ) : rows.map((j, i) => (
+          <div key={j.id}>
+            {i > 0 && <div className="list-divider" />}
+            <div className="list-item">
+              <div className="li-avatar">{j.kode.slice(0, 1)}</div>
+              <div className="li-body">
+                <div className="li-title"><span className="badge primary" style={{ marginRight: 8 }}>{j.kode}</span>{j.nama}</div>
               </div>
-              <div className="flex gap-2">
-                <button className={btnKms} onClick={() => { setForm(j); setOpen(true) }}>Edit</button>
-                <button className={btnDgr} onClick={() => setHapusId(j.id)}>Hapus</button>
+              <div className="li-trailing">
+                <button className="icon-btn" title="Edit" onClick={() => { setForm(j); setOpen(true) }}><MIcon n="edit" /></button>
+                <button className="icon-btn" title="Hapus" onClick={() => setHapusId(j.id)}><MIcon n="delete" /></button>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
+      <button className="fab" title="Tambah jurusan" onClick={() => { setForm({}); setOpen(true) }}>
+        <MIcon n="add" />
+      </button>
+
       <Modal open={open} onClose={() => setOpen(false)} title={form.id ? 'Edit Jurusan' : 'Jurusan Baru'}>
-        <div className="space-y-3">
-          <label className="block text-sm">
-            <span className="text-slate-600">Kode (IPA / IPS / BHS)</span>
-            <input className={inSel + ' mt-1'} value={form.kode ?? ''}
-              onChange={(e) => setForm({ ...form, kode: e.target.value.toUpperCase() })} />
-          </label>
-          <label className="block text-sm">
-            <span className="text-slate-600">Nama</span>
-            <input className={inSel + ' mt-1'} value={form.nama ?? ''}
-              onChange={(e) => setForm({ ...form, nama: e.target.value })} />
-          </label>
-          <div className="flex gap-2 justify-end pt-2">
-            <button className={btnKms} onClick={() => setOpen(false)}>Batal</button>
-            <button className={btn} onClick={simpan}>Simpan</button>
-          </div>
+        <div className="field">
+          <span>Kode (IPA / IPS / BHS)</span>
+          <input className={inSel} value={form.kode ?? ''}
+            onChange={(e) => setForm({ ...form, kode: e.target.value.toUpperCase() })} />
+        </div>
+        <div className="field">
+          <span>Nama</span>
+          <input className={inSel} value={form.nama ?? ''}
+            onChange={(e) => setForm({ ...form, nama: e.target.value })} />
+        </div>
+        <div className="modal-actions">
+          <button className="btn btn-text" onClick={() => setOpen(false)}>Batal</button>
+          <button className={btn} onClick={simpan}>Simpan</button>
         </div>
       </Modal>
 
-      <Modal open={!!hapusId} onClose={() => setHapusId(null)} title="Konfirmasi Hapus">
-        <p className="text-sm text-slate-600 mb-4">Hapus jurusan ini?</p>
-        <div className="flex gap-2 justify-end">
-          <button className={btnKms} onClick={() => setHapusId(null)}>Batal</button>
-          <button className={btnDgr} onClick={hapus}>Ya, hapus</button>
-        </div>
-      </Modal>
+      <Confirm open={!!hapusId} onClose={() => setHapusId(null)} onYes={hapus}
+        title="Hapus jurusan?" desc="Jurusan yang dipakai rombel tidak bisa dihapus." />
     </div>
   )
 }
