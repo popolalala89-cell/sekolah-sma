@@ -616,6 +616,21 @@ create index if not exists ix_tagihan_siswa on public.tagihan (siswa_id, status)
 create index if not exists ix_pembayaran_tagihan on public.pembayaran (tagihan_id);
 create index if not exists ix_rs_siswa on public.rombel_siswa (siswa_id);
 
+-- ─────────────────────────────────────────────────────────────────────
+-- 8. GRANT — fungsi RPC dipanggil dari client, wajib di-grant
+--    (Supabase tidak otomatis grant fungsi ke anon/authenticated)
+-- ─────────────────────────────────────────────────────────────────────
+
+grant execute on function public.current_sekolah_id() to anon, authenticated;
+grant execute on function public.my_peran() to anon, authenticated;
+grant execute on function public.siswa_ids_for_wali() to anon, authenticated;
+
+grant execute on function public.admin_buat_akun(text, text, text, uuid) to authenticated;
+grant execute on function public.admin_set_pin(text) to authenticated;
+grant execute on function public.cek_pin_admin(text) to authenticated;
+grant execute on function public.admin_generate_tagihan_bulanan(date) to authenticated;
+grant execute on function public.admin_naik_kelas() to authenticated;
+
 -- =====================================================================
 -- BOOTSTRAP (jalankan SEKALI, setelah migration di atas sukses):
 --
