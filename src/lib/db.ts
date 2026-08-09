@@ -109,6 +109,64 @@ export async function hapusJurusan(id: string): Promise<void> {
   if (error) throw new Error(error.message)
 }
 
+// ── Wali murid ────────────────────────────────────────────────────
+export interface WaliMurid { id: string; nama: string; telepon: string | null; user_id: string | null }
+
+export async function listWali(): Promise<WaliMurid[]> {
+  const { data } = await supabase.from('wali_murid').select('*').order('nama')
+  return (data ?? []) as WaliMurid[]
+}
+
+export async function simpanWali(w: Partial<WaliMurid> & { nama: string }): Promise<string | null> {
+  const { data, error } = w.id
+    ? await supabase.from('wali_murid').update(w).eq('id', w.id).select('id').single()
+    : await supabase.from('wali_murid').insert(w).select('id').single()
+  if (error) throw new Error(error.message)
+  return data?.id ?? w.id ?? null
+}
+
+export async function hapusWali(id: string): Promise<void> {
+  const { error } = await supabase.from('wali_murid').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+/** peta wali_id -> daftar siswa_id (relasi many-to-many) */
+export async function waliSiswaMap(): Promise<Map<string, string[]>> {
+  const { data } = await supabase.from('wali_siswa').select('wali_murid_id, siswa_id')
+  const m = new Map<string, string[]>()
+  ;(data ?? []).forEach((r) => {
+    const wid = r.wali_murid_id as string
+    const arr = m.get(wid) ?? []
+    arr.push(r.siswa_id as string)
+    m.set(wid, arr)
+  })
+  return m
+}
+
+/** set ulang relasi wali->anak: hapus semua lalu insert list baru */
+export async function setWaliSiswa(waliId: string, siswaIds: string[]): Promise<void> {
+  const { error: delErr } = await supabase.from('wali_siswa').delete().eq('wali_murid_id', waliId)
+  if (delErr) throw new Error(delErr.message)
+  if (siswaIds.length === 0) return
+  const { error: insErr } = await supabase.from('wali_siswa').insert(
+    siswaIds.map((sid) => ({ wali_murid_id: waliId, siswa_id: sid }))
+  )
+  if (insErr) throw new Error(insErr.message)
+}
+
+// akun login wali lewat RPC security-definer (admin saja)
+export async function buatAkunWali(w: WaliMurid, password: string): Promise<string> {
+  const email = `${w.id.slice(0, 8)}@sekolah.local`
+  const { data, error } = await supabase.rpc('admin_buat_akun', {
+    p_email: email, p_password: password, p_peran: 'wali', p_terkait_id: w.id,
+  })
+  if (error) throw error
+  const uid = data as string
+  const { error: upErr } = await supabase.from('wali_murid').update({ user_id: uid }).eq('id', w.id)
+  if (upErr) throw new Error(upErr.message)
+  return email
+}
+
 // ── Rombel ────────────────────────────────────────────────────────
 export async function simpanRombel(r: Partial<Rombel> & { nama: string; tingkat: number }, tahunId: string): Promise<void> {
   const { error } = r.id
