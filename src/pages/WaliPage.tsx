@@ -85,7 +85,7 @@ export default function WaliPage() {
 
       <div className="card" style={{ padding: 0 }}>
         {busy ? <p className="empty">Memuat...</p> : tampil.length === 0 ? (
-          <div className="empty"><MIcon n="family_restroom" /><p>{cari ? 'Tidak ada hasil' : 'Belum ada wali'}</p></div>
+          <div className="empty"><MIcon n="account_circle" /><p>{cari ? 'Tidak ada hasil' : 'Belum ada wali'}</p></div>
         ) : tampil.map((w, i) => {
           const anak = anakMap.get(w.id) ?? []
           return (

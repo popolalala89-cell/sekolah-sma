@@ -40,7 +40,7 @@ const NAV = [
   { to: '/rombel', label: 'Rombel', icon: 'meeting_room' },
   { to: '/spp', label: 'SPP', icon: 'payments' },
   { to: '/nilai', label: 'Nilai', icon: 'scoreboard' },
-  { to: '/wali', label: 'Wali', icon: 'family_restroom' },
+  { to: '/wali', label: 'Wali', icon: 'account_circle' },
 ]
 
 const JUDUL: Record<string, string> = {

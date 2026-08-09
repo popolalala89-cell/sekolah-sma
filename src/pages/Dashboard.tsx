@@ -10,7 +10,7 @@ export default function Dashboard({ peran, email }: { peran: Peran | null; email
         { label: 'Data Guru', sub: 'profil guru', to: '/guru', icon: 'school' },
         { label: 'Rombel', sub: 'kelas & wali kelas', to: '/rombel', icon: 'meeting_room' },
         { label: 'Jurusan', sub: 'IPA / IPS / BHS', to: '/jurusan', icon: 'category' },
-        { label: 'Wali Murid', sub: 'link wali ke anak', to: '/wali', icon: 'family_restroom' },
+        { label: 'Wali Murid', sub: 'link wali ke anak', to: '/wali', icon: 'account_circle' },
         { label: 'Absensi', sub: 'input & rekap kehadiran', to: '/absensi', icon: 'event_available' },
         { label: 'Nilai', sub: 'input nilai per kelas', to: '/nilai', icon: 'scoreboard' },
         { label: 'Rapor', sub: 'rekap & cetak per siswa', to: '/rapor', icon: 'assignment' },
