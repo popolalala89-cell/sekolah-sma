@@ -40,25 +40,28 @@
   src: url('./assets/fonts/MaterialSymbols-sub.woff2') format('woff2');
 }
 
-/* ── Design tokens MD3 (seed: biru sekolah) ────────────────────── */
+/* ── Design tokens MD3 (seed: indigo-violet sekolah) ───────────── */
 :root {
-  --primary: #2e5ca8;
+  --primary: #4355d6;
   --on-primary: #ffffff;
-  --primary-container: #d8e2ff;
-  --on-primary-container: #001946;
-  --secondary: #565e71;
+  --primary-container: #dde0ff;
+  --on-primary-container: #00105c;
+  --secondary: #595e8e;
   --on-secondary: #ffffff;
-  --secondary-container: #dae2f9;
-  --on-secondary-container: #131c2b;
-  --tertiary: #715573;
-  --surface: #fdfbff;
-  --surface-dim: #dddbe0;
-  --surface-container: #f1f0f4;
-  --surface-container-high: #ebeaf0;
-  --on-surface: #1a1c20;
+  --secondary-container: #dfe2ff;
+  --on-secondary-container: #141a48;
+  --tertiary: #7a5ba9;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #f1dbff;
+  --on-tertiary-container: #331155;
+  --surface: #fbf8fd;
+  --surface-dim: #ddd9e3;
+  --surface-container: #f0eef7;
+  --surface-container-high: #ebf2ff;
+  --on-surface: #191c24;
   --on-surface-variant: #44474f;
-  --outline: #74777f;
-  --outline-variant: #c4c6d0;
+  --outline: #757880;
+  --outline-variant: #c7c5d1;
   --error: #ba1a1a;
   --on-error: #ffffff;
   --error-container: #ffdad6;
@@ -66,6 +69,13 @@
   --success: #2e7d32;
   --success-container: #b7f2bd;
   --on-success-container: #002107;
+
+  /* Asupan warna hidup (polesan visual) */
+  --grad-brand: linear-gradient(135deg, #4355d6 0%, #7c5bf5 55%, #a06ce0 100%);
+  --grad-brand-hi: linear-gradient(135deg, #5165f5 0%, #8a6bf8 60%, #b07be8 100%);
+  --grad-topbar: linear-gradient(120deg, #3b4fd8 0%, #6a52e0 55%, #9a5ccf 100%);
+  --bg-ambient: radial-gradient(90% 55% at 90% 0%, rgba(160, 110, 224, 0.14) 0%, transparent 60%),
+                radial-gradient(80% 50% at 8% 8%, rgba(67, 85, 214, 0.12) 0%, transparent 55%);
 
   --topbar-height: 56px;
   --safe-top: env(safe-area-inset-top, 0px);
@@ -78,9 +88,9 @@
   --radius-xl: 24px;
   --radius-full: 999px;
 
-  --elev-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
-  --elev-2: 0 2px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
-  --elev-3: 0 6px 20px rgba(0, 0, 0, 0.16), 0 2px 8px rgba(0, 0, 0, 0.12);
+  --elev-1: 0 1px 3px rgba(30, 20, 80, 0.10), 0 1px 2px rgba(30, 20, 80, 0.06);
+  --elev-2: 0 2px 8px rgba(30, 20, 80, 0.12), 0 2px 4px rgba(30, 20, 80, 0.07);
+  --elev-3: 0 6px 20px rgba(30, 20, 80, 0.16), 0 2px 8px rgba(30, 20, 80, 0.10);
 
   --font: 'Poppins', 'Roboto', system-ui, -apple-system, sans-serif;
 }
@@ -89,7 +99,8 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   font-family: var(--font);
-  background: var(--surface);
+  background: var(--bg-ambient), var(--surface);
+  background-attachment: fixed;
   color: var(--on-surface);
   min-height: 100dvh;
   -webkit-tap-highlight-color: transparent;
@@ -128,67 +139,76 @@ input, select, textarea { font-family: var(--font); }
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   min-height: 0;
+  background: transparent;
 }
 
-/* ── Top App Bar (standard 56px) ───────────────────────────────── */
+/* ── Top App Bar (gradient brand) ──────────────────────────────── */
 .top-app-bar {
   flex-shrink: 0;
   height: calc(var(--topbar-height) + var(--safe-top));
   box-sizing: content-box;
   padding-top: var(--safe-top);
-  background: var(--surface);
-  color: var(--on-surface);
+  background: var(--grad-topbar);
+  color: #ffffff;
   display: flex;
   align-items: center;
   gap: 4px;
   padding-left: 8px;
   padding-right: 12px;
-  border-bottom: 1px solid var(--outline-variant);
+  border-bottom: none;
+  box-shadow: 0 3px 14px rgba(59, 79, 216, 0.35);
   position: relative;
   z-index: 1100;
 }
 .top-app-bar .bar-title {
   flex: 1;
-  font-size: 1.15rem;
-  font-weight: 600;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: #ffffff;
 }
 .top-app-bar .bar-sub {
   font-size: 0.68rem;
   font-weight: 400;
-  opacity: 0.7;
+  opacity: 0.85;
   margin-top: -2px;
+  color: #ffffff;
 }
 .icon-btn {
   width: 44px;
   height: 44px;
   border: none;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-full);
-  color: var(--on-surface);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   transition: background 0.15s;
 }
-.icon-btn:active { background: color-mix(in srgb, var(--on-surface) 10%, transparent); }
+.icon-btn:active { background: rgba(255, 255, 255, 0.28); }
 
 /* avatar bulat kecil di app bar */
 .avatar {
   width: 36px;
   height: 36px;
   border-radius: var(--radius-full);
-  background: var(--primary-container);
-  color: var(--on-primary-container);
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
   flex-shrink: 0;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 /* ── Bottom Navigation (MD3) ───────────────────────────────────── */
@@ -197,10 +217,12 @@ input, select, textarea { font-family: var(--font); }
   height: calc(var(--bottom-nav-height) + var(--safe-bottom));
   box-sizing: border-box;
   padding-bottom: var(--safe-bottom);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
   border-top: 1px solid var(--outline-variant);
   display: flex;
   z-index: 1000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .bn-item {
   flex: 1;
@@ -227,8 +249,9 @@ input, select, textarea { font-family: var(--font); }
   background: transparent;
   border-radius: 15px;
   pointer-events: none;
+  transition: background 0.18s;
 }
-.bn-item.active::before { background: color-mix(in srgb, var(--primary) 14%, transparent); }
+.bn-item.active::before { background: color-mix(in srgb, var(--primary) 16%, transparent); }
 .bn-item .msym { font-size: 23px; }
 .bn-item.active .msym { font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; color: var(--primary); }
 .bn-item .bn-label {
@@ -260,12 +283,12 @@ input, select, textarea { font-family: var(--font); }
 
 /* ── Card & list MD3 ───────────────────────────────────────────── */
 .card {
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 94%, white);
   border: 1px solid var(--outline-variant);
   border-radius: var(--radius-lg);
   padding: 12px 16px;
   margin-bottom: 12px;
-  box-shadow: none;
+  box-shadow: var(--elev-1);
 }
 .card.flat { box-shadow: none; }
 .card-touch { transition: transform 0.12s ease, background 0.15s; }
@@ -350,8 +373,8 @@ input, select, textarea { font-family: var(--font); }
 .btn:active { transform: scale(0.97); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
-.btn-fill { background: var(--primary); color: var(--on-primary); }
-.btn-fill:active { background: color-mix(in srgb, var(--primary) 85%, black); }
+.btn-fill { background: var(--grad-brand); color: var(--on-primary); box-shadow: 0 2px 8px rgba(67, 85, 214, 0.30); }
+.btn-fill:active { background: var(--grad-brand-hi); }
 .btn-tonal { background: var(--secondary-container); color: var(--on-secondary-container); }
 .btn-outline {
   background: transparent;
@@ -375,9 +398,9 @@ input, select, textarea { font-family: var(--font); }
   height: 56px;
   border: none;
   border-radius: var(--radius-lg);
-  background: var(--primary-container);
-  color: var(--on-primary-container);
-  box-shadow: var(--elev-3);
+  background: var(--grad-brand);
+  color: var(--on-primary);
+  box-shadow: 0 6px 16px rgba(67, 85, 214, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -589,31 +612,32 @@ input, select, textarea { font-family: var(--font); }
   justify-content: center;
   padding: 24px;
   background:
-    radial-gradient(120% 60% at 50% -10%, var(--primary-container) 0%, transparent 60%),
+    radial-gradient(120% 60% at 50% -10%, rgba(140, 115, 240, 0.35) 0%, transparent 60%),
+    radial-gradient(90% 50% at 10% 110%, rgba(67, 85, 214, 0.22) 0%, transparent 55%),
     var(--surface);
 }
 .login-logo {
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
-  background: var(--primary);
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  background: var(--grad-brand);
   color: var(--on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 14px;
-  box-shadow: var(--elev-3);
+  box-shadow: 0 8px 24px rgba(67, 85, 214, 0.35);
 }
 .login-title { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.01em; }
 .login-sub { font-size: 0.8rem; color: var(--on-surface-variant); margin: 2px 0 24px; }
 .login-card {
   width: 100%;
   max-width: 360px;
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 96%, white);
   border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   padding: 24px;
-  box-shadow: var(--elev-1);
+  box-shadow: var(--elev-2);
 }
 
 /* ── Empty state ───────────────────────────────────────────────── */
@@ -644,26 +668,39 @@ input, select, textarea { font-family: var(--font); }
 }
 @media (min-width: 560px) { .menu-grid { grid-template-columns: repeat(3, 1fr); } }
 .menu-tile {
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 96%, white);
   border: 1px solid var(--outline-variant);
   border-radius: var(--radius-lg);
   padding: 16px 14px;
   text-decoration: none;
   color: inherit;
-  transition: none;
+  transition: transform 0.12s ease, box-shadow 0.15s;
+  box-shadow: var(--elev-1);
 }
-.menu-tile:active { background: var(--surface-container-high); transform: scale(0.97); }
+.menu-tile:active { transform: scale(0.97); box-shadow: var(--elev-2); }
 .menu-tile .mt-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: var(--radius-md);
-  background: var(--primary-container);
-  color: var(--on-primary-container);
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--grad-brand);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 12px;
+  box-shadow: 0 3px 8px rgba(67, 85, 214, 0.28);
 }
+/* Palet per tile: tiap menu dapat warna ikon sendiri */
+.menu-tile:nth-child(1) .mt-icon { background: linear-gradient(135deg, #4355d6, #6a5cf5); box-shadow: 0 3px 8px rgba(67, 85, 214, 0.30); }
+.menu-tile:nth-child(2) .mt-icon { background: linear-gradient(135deg, #0f9d8f, #2cc4b3); box-shadow: 0 3px 8px rgba(15, 157, 143, 0.30); }
+.menu-tile:nth-child(3) .mt-icon { background: linear-gradient(135deg, #8b5cf6, #b06ef5); box-shadow: 0 3px 8px rgba(139, 92, 246, 0.30); }
+.menu-tile:nth-child(4) .mt-icon { background: linear-gradient(135deg, #16a34a, #4ade80); box-shadow: 0 3px 8px rgba(22, 163, 74, 0.28); }
+.menu-tile:nth-child(5) .mt-icon { background: linear-gradient(135deg, #f97316, #fbbf24); box-shadow: 0 3px 8px rgba(249, 115, 22, 0.28); }
+.menu-tile:nth-child(6) .mt-icon { background: linear-gradient(135deg, #0ea5e9, #38bdf8); box-shadow: 0 3px 8px rgba(14, 165, 233, 0.28); }
+.menu-tile:nth-child(7) .mt-icon { background: linear-gradient(135deg, #ec4899, #f472b6); box-shadow: 0 3px 8px rgba(236, 72, 153, 0.28); }
+.menu-tile:nth-child(8) .mt-icon { background: linear-gradient(135deg, #f59e0b, #fbbf24); box-shadow: 0 3px 8px rgba(245, 158, 11, 0.28); }
+.menu-tile:nth-child(9) .mt-icon { background: linear-gradient(135deg, #6366f1, #818cf8); box-shadow: 0 3px 8px rgba(99, 102, 241, 0.28); }
+.menu-tile:nth-child(10) .mt-icon { background: linear-gradient(135deg, #10b981, #34d399); box-shadow: 0 3px 8px rgba(16, 185, 129, 0.28); }
 .menu-tile .mt-label { font-size: 0.88rem; font-weight: 600; line-height: 1.25; }
 .menu-tile .mt-sub { font-size: 0.7rem; color: var(--on-surface-variant); margin-top: 2px; }
 
