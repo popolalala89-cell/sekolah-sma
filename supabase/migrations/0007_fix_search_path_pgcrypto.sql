@@ -66,13 +66,15 @@ begin
   );
 
   -- 2) identity (wajib supaya bisa login email+password)
+  --    CATATAN: kolom identities.email GENERATED (lower(identity_data->>'email'))
+  --    di versi Supabase ini -> JANGAN diisi manual, biar dihitung otomatis.
   insert into auth.identities (
-    id, user_id, provider_id, identity_data, provider, email,
+    id, user_id, provider_id, identity_data, provider,
     last_sign_in_at, created_at, updated_at
   ) values (
     gen_random_uuid(), v_uid, v_uid::text,
     jsonb_build_object('sub', v_uid::text, 'email', p_email),
-    'email', p_email, now(), now(), now()
+    'email', now(), now(), now()
   );
 
   -- 3) baris peran di tabel akun
