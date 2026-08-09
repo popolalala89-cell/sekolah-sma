@@ -15,6 +15,7 @@ import AbsensiPage from './pages/AbsensiPage'
 import NilaiPage from './pages/NilaiPage'
 import RaporPage from './pages/RaporPage'
 import JadwalPage from './pages/JadwalPage'
+import SppPage from './pages/SppPage'
 
 function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -37,6 +38,7 @@ const NAV = [
   { to: '/siswa', label: 'Siswa', icon: 'groups' },
   { to: '/guru', label: 'Guru', icon: 'school' },
   { to: '/rombel', label: 'Rombel', icon: 'meeting_room' },
+  { to: '/spp', label: 'SPP', icon: 'payments' },
   { to: '/nilai', label: 'Nilai', icon: 'scoreboard' },
   { to: '/wali', label: 'Wali', icon: 'family_restroom' },
 ]
@@ -44,7 +46,7 @@ const NAV = [
 const JUDUL: Record<string, string> = {
   '/': 'Beranda', '/siswa': 'Data Siswa', '/guru': 'Data Guru',
   '/rombel': 'Rombel', '/jurusan': 'Jurusan', '/wali': 'Wali Murid',
-  '/nilai': 'Nilai', '/rapor': 'Rapor', '/jadwal': 'Jadwal',
+  '/nilai': 'Nilai', '/rapor': 'Rapor', '/jadwal': 'Jadwal', '/spp': 'Keuangan SPP',
 }
 
 function Shell({ user, peran, children }: { user: User; peran: Peran | null; children: React.ReactNode }) {
@@ -102,6 +104,7 @@ function AppRoutes() {
         <Route path="/nilai" element={<Guarded peran={peran} roles={['admin', 'guru']}><NilaiPage /></Guarded>} />
         <Route path="/rapor" element={<Guarded peran={peran} roles={['admin', 'guru']}><RaporPage /></Guarded>} />
         <Route path="/jadwal" element={<Guarded peran={peran} roles={['admin', 'guru']}><JadwalPage /></Guarded>} />
+        <Route path="/spp" element={<Guarded peran={peran} roles={['admin']}><SppPage /></Guarded>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Shell>

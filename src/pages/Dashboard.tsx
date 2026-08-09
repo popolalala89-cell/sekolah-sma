@@ -15,7 +15,7 @@ export default function Dashboard({ peran, email }: { peran: Peran | null; email
         { label: 'Nilai', sub: 'input nilai per kelas', to: '/nilai', icon: 'scoreboard' },
         { label: 'Rapor', sub: 'rekap & cetak per siswa', to: '/rapor', icon: 'assignment' },
         { label: 'Jadwal', sub: 'susun jadwal pelajaran', to: '/jadwal', icon: 'calendar_month' },
-        { label: 'Keuangan SPP', sub: 'Fase 1.6', to: '/', icon: 'payments' },
+        { label: 'Keuangan SPP', sub: 'biaya, tagihan, bayar', to: '/spp', icon: 'payments' },
       ]
     : [
         { label: 'Dashboard Saya', sub: peran === 'guru' ? 'Absensi & nilai' : 'Info anak', to: '/', icon: 'dashboard' },

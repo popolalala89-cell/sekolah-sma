@@ -396,3 +396,63 @@ export async function hapusJadwalSlot(id: string): Promise<void> {
   const { error } = await supabase.from('jadwal').delete().eq('id', id)
   if (error) throw new Error(error.message)
 }
+
+// ── SPP (fase 1.6) ────────────────────────────────────────────────
+export interface Biaya {
+  id: string; sekolah_id: number; tahun_ajaran_id: string; nama: string
+  nominal: number; periode: 'bulanan' | 'tahunan'; berlaku_rombel_id: string | null
+}
+export interface Tagihan {
+  id: string; siswa_id: string; biaya_id: string; bulan: string | null
+  nominal: number; jatuh_tempo: string | null; status: 'belum' | 'lunas' | 'terlambat'
+}
+export interface Pembayaran {
+  id: string; siswa_id: string; tagihan_id: string; nominal: number
+  tanggal: string; metode: 'tunai' | 'transfer'; no_ref: string | null; catatan: string | null
+}
+
+export async function listBiaya(): Promise<Biaya[]> {
+  const { data } = await supabase.from('biaya').select('*').order('nama')
+  return (data ?? []) as Biaya[]
+}
+
+export async function simpanBiaya(b: Partial<Biaya> & { nama: string; nominal: number; tahun_ajaran_id: string }): Promise<void> {
+  const { error } = b.id
+    ? await supabase.from('biaya').update(b).eq('id', b.id)
+    : await supabase.from('biaya').insert(b)
+  if (error) throw new Error(error.message)
+}
+
+export async function hapusBiaya(id: string): Promise<void> {
+  const { error } = await supabase.from('biaya').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+/** generate tagihan bulanan semua siswa aktif (RPC) — return jumlah baru */
+export async function generateTagihanBulanan(bulan: string): Promise<number> {
+  const { data, error } = await supabase.rpc('admin_generate_tagihan_bulanan', { p_bulan: bulan })
+  if (error) throw new Error(error.message)
+  return (data as number) ?? 0
+}
+
+/** tagihan satu bulan (bulan = 'YYYY-MM-01') */
+export async function listTagihan(bulan: string): Promise<Tagihan[]> {
+  const { data } = await supabase.from('tagihan').select('*').eq('bulan', bulan).order('created_at')
+  return (data ?? []) as Tagihan[]
+}
+
+export async function listPembayaran(): Promise<Pembayaran[]> {
+  const { data } = await supabase.from('pembayaran').select('*').order('tanggal', { ascending: false }).limit(500)
+  return (data ?? []) as Pembayaran[]
+}
+
+/** status tagihan di-sinkron otomatis oleh trigger DB (migrasi 0010) */
+export async function simpanPembayaran(p: Omit<Pembayaran, 'id'>): Promise<void> {
+  const { error } = await supabase.from('pembayaran').insert(p)
+  if (error) throw new Error(error.message)
+}
+
+export async function hapusPembayaran(id: string): Promise<void> {
+  const { error } = await supabase.from('pembayaran').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
