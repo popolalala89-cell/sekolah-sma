@@ -224,7 +224,6 @@ input, select, textarea { font-family: var(--font); }
   z-index: 1000;
   backdrop-filter: blur(14px) saturate(1.5);
   -webkit-backdrop-filter: blur(14px) saturate(1.5);
-  box-shadow: 0 -6px 18px rgba(30, 20, 80, 0.08);
 }
 .bn-mobile { display: flex; }
 .bn-side { display: none; }
@@ -274,6 +273,7 @@ input, select, textarea { font-family: var(--font); }
 
 /* ── FAB raised di tengah bottom-nav (Rombel) ─────────────────── */
 .bn-fab {
+  position: relative;
   flex: 1;
   max-width: 96px;
   margin: 0 auto;
@@ -282,31 +282,34 @@ input, select, textarea { font-family: var(--font); }
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 2px;
+  justify-content: flex-end;
+  padding-bottom: 10px;
   color: var(--on-surface-variant);
   text-decoration: none;
 }
 .bn-fab-inner {
-  width: 52px;
-  height: 52px;
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   background: var(--grad-brand);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 16px rgba(67, 85, 214, 0.45), 0 2px 6px rgba(30, 20, 80, 0.18);
-  margin-bottom: calc(var(--bottom-nav-height) * -0.62);
+  box-shadow: 0 6px 18px rgba(67, 85, 214, 0.45), 0 2px 6px rgba(30, 20, 80, 0.18);
   transition: transform 0.15s, box-shadow 0.15s;
 }
 .bn-fab-inner .msym { font-size: 26px; }
-.bn-fab:active .bn-fab-inner { transform: scale(0.9); box-shadow: 0 3px 8px rgba(67, 85, 214, 0.4); }
+.bn-fab:active .bn-fab-inner { transform: translateX(-50%) scale(0.9); box-shadow: 0 3px 8px rgba(67, 85, 214, 0.4); }
 .bn-fab-label {
   font-size: 0.62rem;
   font-weight: 600;
   line-height: 1.2;
-  transform: translateY(6px);
+  color: var(--on-surface-variant);
 }
 .bn-fab.active .bn-fab-label { color: var(--primary); }
 
