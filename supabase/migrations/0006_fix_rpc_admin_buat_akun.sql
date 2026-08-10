@@ -25,19 +25,22 @@ begin
   end if;
 
   -- 1) user auth (email confirm otomatis, peran di app_metadata)
+  -- CATATAN: kolom email TIDAK di-insert — di versi Supabase terbaru
+  -- email adalah generated column, terisi otomatis dari identities
   insert into auth.users (
-    id, instance_id, aud, role, email, encrypted_password,
+    id, instance_id, aud, role, encrypted_password,
     email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
     created_at, updated_at, confirmation_token, recovery_token,
     email_change_token_new, email_change, is_sso_user, is_anonymous
   ) values (
-    v_uid, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', p_email,
+    v_uid, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
     crypt(p_password, gen_salt('bf')), now(),
     jsonb_build_object('provider', 'email', 'providers', jsonb_build_array('email'), 'peran', p_peran),
     '{}'::jsonb, now(), now(), '', '', '', '', false, false
   );
 
-  -- 2) identity (wajib supaya bisa login email+password)
+  -- 2) identity (wajib supaya bisa login email+password — email terisi
+  -- dari sini via generated column)
   insert into auth.identities (
     id, user_id, provider_id, identity_data, provider, email,
     last_sign_in_at, created_at, updated_at

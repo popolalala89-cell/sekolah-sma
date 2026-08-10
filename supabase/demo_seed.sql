@@ -218,14 +218,17 @@ where sw.id = t.siswa_id
 -- demo.guru@sekolah.local / demo1234   (role guru)
 -- demo.wali@sekolah.local / demo1234   (role wali)
 -- demo.siswa@sekolah.local / demo1234  (role siswa)
+-- CATATAN: kolom email di auth.users adalah GENERATED (versi Supabase
+-- terbaru) — tidak boleh di-insert; email terisi otomatis dari
+-- baris identities (provider email) di bawah.
 insert into auth.users (
-  id, instance_id, aud, role, email, encrypted_password,
+  id, instance_id, aud, role, encrypted_password,
   email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
   created_at, updated_at, confirmation_token, recovery_token,
   email_change_token_new, email_change, is_sso_user, is_anonymous
 )
 select
-  gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', v.email,
+  gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
   crypt('demo1234', gen_salt('bf')), now(),
   jsonb_build_object('provider', 'email', 'providers', jsonb_build_array('email'), 'peran', v.peran),
   '{}'::jsonb, now(), now(), '', '', '', '', false, false
@@ -236,11 +239,12 @@ from (values
 ) as v(email, peran)
 where not exists (select 1 from auth.users u where u.email = v.email);
 
--- identities (wajib supaya bisa login email+password)
-insert into auth.identities (id, user_id, provider_id, identity_data, provider, email, last_sign_in_at, created_at, updated_at)
+-- identities (wajib supaya bisa login email+password; identities.email
+-- juga GENERATED di versi ini -> jangan diisi, biar otomatis)
+insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
 select gen_random_uuid(), u.id, u.id::text,
   jsonb_build_object('sub', u.id::text, 'email', u.email),
-  'email', u.email, now(), now(), now()
+  'email', now(), now(), now()
 from auth.users u
 where u.email in ('demo.guru@sekolah.local','demo.wali@sekolah.local','demo.siswa@sekolah.local')
   and not exists (select 1 from auth.identities i where i.user_id = u.id);
