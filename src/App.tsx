@@ -45,21 +45,27 @@ type NavConf = { main: NavItem[]; fab?: NavItem; more?: NavItem[] }
 const N = (to: string, label: string, icon: string): NavItem => ({ to, label, icon })
 
 // main  = menu langsung di bottom-nav (mobile)
-// fab   = tombol tengah raised (FAB)
+// fab   = tombol tengah raised (FAB) — menu PALING SERING dikunjungi per role
 // more  = menu tersembunyi di balik item "Lainnya" (sheet)
 const NAVS: Record<Peran, NavConf> = {
   admin: {
-    main: [N('/', 'Beranda', 'home'), N('/siswa', 'Siswa', 'groups'), N('/spp', 'SPP', 'payments')],
-    fab: N('/rombel', 'Rombel', 'meeting_room'),
-    more: [N('/guru', 'Guru', 'school'), N('/nilai', 'Nilai', 'scoreboard'), N('/wali', 'Wali', 'account_circle')],
+    // FAB = Keuangan SPP (dicek tiap bulan); Rombel/Jurusan/dll di sheet
+    main: [N('/', 'Beranda', 'home'), N('/siswa', 'Siswa', 'groups'), N('/absensi', 'Absensi', 'event_available')],
+    fab: N('/spp', 'SPP', 'payments'),
+    more: [N('/guru', 'Guru', 'school'), N('/rombel', 'Rombel', 'meeting_room'), N('/jurusan', 'Jurusan', 'category'), N('/wali', 'Wali', 'account_circle'), N('/nilai', 'Nilai', 'scoreboard'), N('/rapor', 'Rapor', 'assignment'), N('/jadwal', 'Jadwal', 'calendar_month')],
   },
   guru: {
-    main: [N('/', 'Beranda', 'home'), N('/absensi', 'Absensi', 'event_available'), N('/nilai', 'Nilai', 'scoreboard'), N('/rapor', 'Rapor', 'assignment'), N('/jadwal', 'Jadwal', 'calendar_month')],
+    // FAB = Absensi (tiap hari); jadwal muat di slot biasa
+    main: [N('/', 'Beranda', 'home'), N('/nilai', 'Nilai', 'scoreboard'), N('/rapor', 'Rapor', 'assignment'), N('/jadwal', 'Jadwal', 'calendar_month')],
+    fab: N('/absensi', 'Absensi', 'event_available'),
+    more: [],
   },
   wali: {
+    // 3 menu muat semua — tanpa FAB biar simetris & jelas
     main: [N('/', 'Beranda', 'home'), N('/rapor', 'Rapor', 'assignment'), N('/tagihan-saya', 'Tagihan', 'payments')],
   },
   siswa: {
+    // 3 menu muat semua — tanpa FAB biar simetris & jelas
     main: [N('/', 'Beranda', 'home'), N('/rapor', 'Rapor', 'assignment'), N('/tagihan-saya', 'Tagihan', 'payments')],
   },
 }
