@@ -121,7 +121,9 @@ export default function RaporPage({ peran }: { peran: Peran }) {
   }, [selected, tahunId])
 
   /** isi rapor utuh — dipakai di layar (print-area) & portal cetak (print-zone) */
-  const raporJsx = () => (
+  const raporJsx = () => {
+    if (!selected) return null
+    return (
     <div className="rapor">
       <div className="rapor-head">
         <h2>{sekolah}</h2>
@@ -170,7 +172,8 @@ export default function RaporPage({ peran }: { peran: Peran }) {
       </div>
       <p className="r-foot">Dicetak via aplikasi — Arsip digital di fase 2 (e-Rapor).</p>
     </div>
-  )
+    )
+  }
 
   const rerataTotal = (() => {
     const arr = rekap.map((r) => r.rerata).filter((v): v is number => v !== null)
