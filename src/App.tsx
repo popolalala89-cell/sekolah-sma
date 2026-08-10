@@ -33,15 +33,30 @@ function useAuth() {
   return { user, loading }
 }
 
-const NAV = [
-  { to: '/', label: 'Beranda', icon: 'home' },
-  { to: '/siswa', label: 'Siswa', icon: 'groups' },
-  { to: '/guru', label: 'Guru', icon: 'school' },
-  { to: '/rombel', label: 'Rombel', icon: 'meeting_room' },
-  { to: '/spp', label: 'SPP', icon: 'payments' },
-  { to: '/nilai', label: 'Nilai', icon: 'scoreboard' },
-  { to: '/wali', label: 'Wali', icon: 'account_circle' },
-]
+const NAVS: Record<Peran, { to: string; label: string; icon: string }[]> = {
+  admin: [
+    { to: '/', label: 'Beranda', icon: 'home' },
+    { to: '/siswa', label: 'Siswa', icon: 'groups' },
+    { to: '/guru', label: 'Guru', icon: 'school' },
+    { to: '/rombel', label: 'Rombel', icon: 'meeting_room' },
+    { to: '/spp', label: 'SPP', icon: 'payments' },
+    { to: '/nilai', label: 'Nilai', icon: 'scoreboard' },
+    { to: '/wali', label: 'Wali', icon: 'account_circle' },
+  ],
+  guru: [
+    { to: '/', label: 'Beranda', icon: 'home' },
+    { to: '/absensi', label: 'Absensi', icon: 'event_available' },
+    { to: '/nilai', label: 'Nilai', icon: 'scoreboard' },
+    { to: '/rapor', label: 'Rapor', icon: 'assignment' },
+    { to: '/jadwal', label: 'Jadwal', icon: 'calendar_month' },
+  ],
+  wali: [
+    { to: '/', label: 'Beranda', icon: 'home' },
+  ],
+  siswa: [
+    { to: '/', label: 'Beranda', icon: 'home' },
+  ],
+}
 
 const JUDUL: Record<string, string> = {
   '/': 'Beranda', '/siswa': 'Data Siswa', '/guru': 'Data Guru',
@@ -51,7 +66,8 @@ const JUDUL: Record<string, string> = {
 
 function Shell({ user, peran, children }: { user: User; peran: Peran | null; children: React.ReactNode }) {
   const loc = useLocation()
-  const active = NAV.find((n) => n.to === loc.pathname)
+  const nav = (peran ? NAVS[peran] : []) as { to: string; label: string; icon: string }[]
+  const active = nav.find((n) => n.to === loc.pathname)
   return (
     <div className="app-layout">
       <header className="top-app-bar">
@@ -64,9 +80,9 @@ function Shell({ user, peran, children }: { user: User; peran: Peran | null; chi
 
       <div className="app-scroll">{children}</div>
 
-      {peran === 'admin' && (
+      {peran && (
         <nav className="bottom-nav">
-          {NAV.map((n) => {
+          {nav.map((n) => {
             const isActive = loc.pathname === n.to
             return (
               <a key={n.to} href={`#${n.to}`} className={`bn-item${isActive ? ' active' : ''}`}>
