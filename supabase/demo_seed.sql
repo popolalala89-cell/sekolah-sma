@@ -124,11 +124,11 @@ from public.sekolah s
 cross join public.rombel r
 cross join public.tahun_ajaran ta
 cross join (values
-  (10, 1, '07:00', '08:40', 'R.101', 'MTK'),
-  (10, 2, '08:40', '10:20', 'R.101', 'BIN'),
-  (10, 3, '10:30', '12:10', 'R.102', 'ING'),
-  (11, 1, '07:00', '08:40', 'R.201', 'FIS'),
-  (11, 2, '08:40', '10:20', 'R.201', 'MTK')
+  (10, 1, '07:00'::time, '08:40'::time, 'R.101', 'MTK'),
+  (10, 2, '08:40'::time, '10:20'::time, 'R.101', 'BIN'),
+  (10, 3, '10:30'::time, '12:10'::time, 'R.102', 'ING'),
+  (11, 1, '07:00'::time, '08:40'::time, 'R.201', 'FIS'),
+  (11, 2, '08:40'::time, '10:20'::time, 'R.201', 'MTK')
 ) as v(tingkat, hari, mulai, selesai, ruang, kode)
 join public.jurusan j on j.sekolah_id = s.id and j.kode = 'IPA'
 join public.mapel m on m.sekolah_id = s.id and m.kode = v.kode
