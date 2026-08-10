@@ -220,12 +220,11 @@ input, select, textarea { font-family: var(--font); }
   background: linear-gradient(180deg,
     color-mix(in srgb, var(--surface) 48%, transparent) 0%,
     color-mix(in srgb, var(--surface) 90%, white) 100%);
-  border-top: 1px solid color-mix(in srgb, var(--outline-variant) 55%, transparent);
   display: flex;
   z-index: 1000;
   backdrop-filter: blur(14px) saturate(1.5);
   -webkit-backdrop-filter: blur(14px) saturate(1.5);
-  box-shadow: 0 -2px 14px rgba(30, 20, 80, 0.06);
+  box-shadow: 0 -6px 18px rgba(30, 20, 80, 0.08);
 }
 .bn-item {
   flex: 1;
