@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import type { User } from '@supabase/supabase-js'
 import { supabase, peranDariUser, type Peran } from './lib/supabase'
-import { ToastProvider } from './lib/ui'
+import { ToastProvider, Modal } from './lib/ui'
 import { MIcon } from './lib/icons'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -34,33 +34,29 @@ function useAuth() {
   return { user, loading }
 }
 
-const NAVS: Record<Peran, { to: string; label: string; icon: string }[]> = {
-  admin: [
-    { to: '/', label: 'Beranda', icon: 'home' },
-    { to: '/siswa', label: 'Siswa', icon: 'groups' },
-    { to: '/guru', label: 'Guru', icon: 'school' },
-    { to: '/rombel', label: 'Rombel', icon: 'meeting_room' },
-    { to: '/spp', label: 'SPP', icon: 'payments' },
-    { to: '/nilai', label: 'Nilai', icon: 'scoreboard' },
-    { to: '/wali', label: 'Wali', icon: 'account_circle' },
-  ],
-  guru: [
-    { to: '/', label: 'Beranda', icon: 'home' },
-    { to: '/absensi', label: 'Absensi', icon: 'event_available' },
-    { to: '/nilai', label: 'Nilai', icon: 'scoreboard' },
-    { to: '/rapor', label: 'Rapor', icon: 'assignment' },
-    { to: '/jadwal', label: 'Jadwal', icon: 'calendar_month' },
-  ],
-  wali: [
-    { to: '/', label: 'Beranda', icon: 'home' },
-    { to: '/rapor', label: 'Rapor', icon: 'assignment' },
-    { to: '/tagihan-saya', label: 'Tagihan', icon: 'payments' },
-  ],
-  siswa: [
-    { to: '/', label: 'Beranda', icon: 'home' },
-    { to: '/rapor', label: 'Rapor', icon: 'assignment' },
-    { to: '/tagihan-saya', label: 'Tagihan', icon: 'payments' },
-  ],
+type NavItem = { to: string; label: string; icon: string }
+type NavConf = { main: NavItem[]; fab?: NavItem; more?: NavItem[] }
+
+const N = (to: string, label: string, icon: string): NavItem => ({ to, label, icon })
+
+// main  = menu langsung di bottom-nav (mobile)
+// fab   = tombol tengah raised (FAB)
+// more  = menu tersembunyi di balik item "Lainnya" (sheet)
+const NAVS: Record<Peran, NavConf> = {
+  admin: {
+    main: [N('/', 'Beranda', 'home'), N('/siswa', 'Siswa', 'groups'), N('/spp', 'SPP', 'payments')],
+    fab: N('/rombel', 'Rombel', 'meeting_room'),
+    more: [N('/guru', 'Guru', 'school'), N('/nilai', 'Nilai', 'scoreboard'), N('/wali', 'Wali', 'account_circle')],
+  },
+  guru: {
+    main: [N('/', 'Beranda', 'home'), N('/absensi', 'Absensi', 'event_available'), N('/nilai', 'Nilai', 'scoreboard'), N('/rapor', 'Rapor', 'assignment'), N('/jadwal', 'Jadwal', 'calendar_month')],
+  },
+  wali: {
+    main: [N('/', 'Beranda', 'home'), N('/rapor', 'Rapor', 'assignment'), N('/tagihan-saya', 'Tagihan', 'payments')],
+  },
+  siswa: {
+    main: [N('/', 'Beranda', 'home'), N('/rapor', 'Rapor', 'assignment'), N('/tagihan-saya', 'Tagihan', 'payments')],
+  },
 }
 
 const JUDUL: Record<string, string> = {
@@ -72,8 +68,18 @@ const JUDUL: Record<string, string> = {
 
 function Shell({ user, peran, children }: { user: User; peran: Peran | null; children: React.ReactNode }) {
   const loc = useLocation()
-  const nav = (peran ? NAVS[peran] : []) as { to: string; label: string; icon: string }[]
-  const active = nav.find((n) => n.to === loc.pathname)
+  const [moreOpen, setMoreOpen] = useState(false)
+  const conf = (peran ? NAVS[peran] : null) as NavConf | null
+  const more = conf?.more ?? []
+  const all = conf ? [...conf.main, ...(conf.fab ? [conf.fab] : []), ...more] : []
+  const active = all.find((x) => x.to === loc.pathname)
+  const onMore = more.some((x) => x.to === loc.pathname)
+
+  function go(to: string) {
+    setMoreOpen(false)
+    window.location.hash = '#' + to
+  }
+
   return (
     <div className="app-layout">
       <header className="top-app-bar">
@@ -86,18 +92,69 @@ function Shell({ user, peran, children }: { user: User; peran: Peran | null; chi
 
       <div className="app-scroll">{children}</div>
 
-      {peran && (
-        <nav className="bottom-nav">
-          {nav.map((n) => {
-            const isActive = loc.pathname === n.to
-            return (
-              <a key={n.to} href={`#${n.to}`} className={`bn-item${isActive ? ' active' : ''}`}>
-                <span className="bn-icon"><MIcon n={n.icon} /></span>
-                <span className="bn-label">{n.label}</span>
+      {peran && conf && (
+        <>
+          {/* Mobile: bottom nav 5 slot — item / FAB raised tengah / "Lainnya" */}
+          <nav className="bottom-nav bn-mobile">
+            {conf.main.slice(0, 2).map((n) => {
+              const isActive = loc.pathname === n.to
+              return (
+                <a key={n.to} href={`#${n.to}`} className={`bn-item${isActive ? ' active' : ''}`}>
+                  <span className="bn-icon"><MIcon n={n.icon} /></span>
+                  <span className="bn-label">{n.label}</span>
+                </a>
+              )
+            })}
+
+            {conf.fab ? (
+              <a href={`#${conf.fab.to}`} className={`bn-fab${loc.pathname === conf.fab.to ? ' active' : ''}`}>
+                <span className="bn-fab-inner"><MIcon n={conf.fab.icon} /></span>
+                <span className="bn-fab-label">{conf.fab.label}</span>
               </a>
-            )
-          })}
-        </nav>
+            ) : null}
+
+            {conf.main.slice(2).map((n) => {
+              const isActive = loc.pathname === n.to
+              return (
+                <a key={n.to} href={`#${n.to}`} className={`bn-item${isActive ? ' active' : ''}`}>
+                  <span className="bn-icon"><MIcon n={n.icon} /></span>
+                  <span className="bn-label">{n.label}</span>
+                </a>
+              )
+            })}
+
+            {more.length > 0 && (
+              <button className={`bn-item ${onMore ? 'active' : ''}`} onClick={() => setMoreOpen(true)}>
+                <span className="bn-icon"><MIcon n="menu" /></span>
+                <span className="bn-label">Lainnya</span>
+              </button>
+            )}
+          </nav>
+
+          {/* Desktop: sidebar daftar LENGKAP (main + fab + more) */}
+          <nav className="bottom-nav bn-side">
+            {all.map((n) => {
+              const isActive = loc.pathname === n.to
+              return (
+                <a key={n.to} href={`#${n.to}`} className={`bn-item${isActive ? ' active' : ''}`}>
+                  <span className="bn-icon"><MIcon n={n.icon} /></span>
+                  <span className="bn-label">{n.label}</span>
+                </a>
+              )
+            })}
+          </nav>
+
+          <Modal open={moreOpen} onClose={() => setMoreOpen(false)} title="Semua menu">
+            {more.map((m) => (
+              <button key={m.to} className="list-item nav-more-item"
+                onClick={() => go(m.to)}>
+                <span className="li-avatar"><MIcon n={m.icon} /></span>
+                <span className="li-body"><span className="li-title">{m.label}</span></span>
+                <span className="li-trailing" style={{ color: 'var(--on-surface-variant)' }}><MIcon n="chevron_right" /></span>
+              </button>
+            ))}
+          </Modal>
+        </>
       )}
     </div>
   )
