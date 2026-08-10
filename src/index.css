@@ -96,6 +96,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+a { text-decoration: none; color: inherit; -webkit-tap-highlight-color: transparent; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   font-family: var(--font);
@@ -106,6 +107,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 button { font-family: var(--font); cursor: pointer; touch-action: manipulation; }
+button:focus, a:focus { outline: none; }
 input, select, textarea { font-family: var(--font); }
 
 /* ── Ikon Material Symbols ─────────────────────────────────────── */
