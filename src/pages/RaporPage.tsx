@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   tahunAktifId, listRombel, listSiswaRombel, rekapNilaiSiswa, namaSekolah,
   anakSaya, siswaIdLogin, rombelSiswaMap,
@@ -26,6 +27,18 @@ export default function RaporPage({ peran }: { peran: Peran }) {
   const [rombelNama, setRombelNama] = useState('')
   const [busy, setBusy] = useState(true)
   const [rekapBusy, setRekapBusy] = useState(false)
+  const [mencetak, setMencetak] = useState(false) // mode print: portal rapor saja
+
+  // saat mode cetak aktif: panggil window.print() (dialog browser),
+  // lalu matikan mode setelah dialog selesai (afterprint) / 30s fallback
+  useEffect(() => {
+    if (!mencetak) return
+    const selesai = () => setMencetak(false)
+    const fallback = setTimeout(selesai, 30000)
+    window.addEventListener('afterprint', selesai)
+    const t = setTimeout(() => window.print(), 60)
+    return () => { clearTimeout(t); clearTimeout(fallback); window.removeEventListener('afterprint', selesai) }
+  }, [mencetak])
 
   useEffect(() => {
     ;(async () => {
@@ -106,6 +119,58 @@ export default function RaporPage({ peran }: { peran: Peran }) {
       pilihSiswa(selected)
     }
   }, [selected, tahunId])
+
+  /** isi rapor utuh — dipakai di layar (print-area) & portal cetak (print-zone) */
+  const raporJsx = () => (
+    <div className="rapor">
+      <div className="rapor-head">
+        <h2>{sekolah}</h2>
+        <p>Laporan Hasil Belajar Siswa</p>
+        <p className="r-sub">{JUDUL_SEMESTER[semester]}{tahunNama ? ` · ${tahunNama}` : ''}</p>
+      </div>
+      <div className="r-id">
+        <span>Nama: <b>{selected.nama}</b></span>
+        <span>NISN: {selected.nisn}</span>
+        <span>Rombel: {isKelas ? rombels.find((r) => r.id === rombelId)?.nama ?? '-' : rombelNama}</span>
+      </div>
+      <div className="rapor-scroll">
+        <table className="rapor-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Mapel</th>
+              {JENIS_NILAI.map((j) => <th key={j} className="r-c">{LABEL_JENIS[j]}</th>)}
+              <th className="r-c">Rata-rata</th><th className="r-c">Pred.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rekap.map((r, i) => (
+              <tr key={r.mapelId}>
+                <td>{i + 1}</td>
+                <td>{r.kode} — {r.nama}</td>
+                {JENIS_NILAI.map((j) => <td key={j} className="r-c">{fmtNilai(r.byJenis[j] ?? null)}</td>)}
+                <td className="r-c r-bold">{fmtNilai(r.rerata)}</td>
+                <td className="r-c r-bold">{predikat(r.rerata)}</td>
+              </tr>
+            ))}
+            {rekap.length === 0 && (
+              <tr><td colSpan={JENIS_NILAI.length + 4} style={{ textAlign: 'center', color: 'var(--on-surface-variant)' }}>
+                Belum ada nilai untuk semester ini
+              </td></tr>
+            )}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan={2}>Rata-rata seluruh mapel</td>
+              {JENIS_NILAI.map((j) => <td key={j} className="r-c" />)}
+              <td className="r-c r-bold">{fmtNilai(rerataTotal)}</td>
+              <td className="r-c r-bold">{predikat(rerataTotal)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <p className="r-foot">Dicetak via aplikasi — Arsip digital di fase 2 (e-Rapor).</p>
+    </div>
+  )
 
   const rerataTotal = (() => {
     const arr = rekap.map((r) => r.rerata).filter((v): v is number => v !== null)
@@ -212,61 +277,20 @@ export default function RaporPage({ peran }: { peran: Peran }) {
         <div className="print-area card">
           {rekapBusy ? <p className="empty">Menyusun rapor...</p> : (
             <>
-              <div className="rapor">
-                <div className="rapor-head">
-                  <h2>{sekolah}</h2>
-                  <p>Laporan Hasil Belajar Siswa</p>
-                  <p className="r-sub">{JUDUL_SEMESTER[semester]}{tahunNama ? ` · ${tahunNama}` : ''}</p>
-                </div>
-                <div className="r-id">
-                  <span>Nama: <b>{selected.nama}</b></span>
-                  <span>NISN: {selected.nisn}</span>
-                  <span>Rombel: {isKelas ? rombels.find((r) => r.id === rombelId)?.nama ?? '-' : rombelNama}</span>
-                </div>
-                <div className="rapor-scroll">
-                <table className="rapor-table">
-                  <thead>
-                    <tr>
-                      <th>#</th><th>Mapel</th>
-                      {JENIS_NILAI.map((j) => <th key={j} className="r-c">{LABEL_JENIS[j]}</th>)}
-                      <th className="r-c">Rata-rata</th><th className="r-c">Pred.</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rekap.map((r, i) => (
-                      <tr key={r.mapelId}>
-                        <td>{i + 1}</td>
-                        <td>{r.kode} — {r.nama}</td>
-                        {JENIS_NILAI.map((j) => <td key={j} className="r-c">{fmtNilai(r.byJenis[j] ?? null)}</td>)}
-                        <td className="r-c r-bold">{fmtNilai(r.rerata)}</td>
-                        <td className="r-c r-bold">{predikat(r.rerata)}</td>
-                      </tr>
-                    ))}
-                    {rekap.length === 0 && (
-                      <tr><td colSpan={JENIS_NILAI.length + 4} style={{ textAlign: 'center', color: 'var(--on-surface-variant)' }}>
-                        Belum ada nilai untuk semester ini
-                      </td></tr>
-                    )}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colSpan={2}>Rata-rata seluruh mapel</td>
-                      {JENIS_NILAI.map((j) => <td key={j} className="r-c" />)}
-                      <td className="r-c r-bold">{fmtNilai(rerataTotal)}</td>
-                      <td className="r-c r-bold">{predikat(rerataTotal)}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-                </div>
-                <p className="r-foot">Dicetak via aplikasi — Arsip digital di fase 2 (e-Rapor).</p>
-              </div>
+              {raporJsx()}
               <div className="no-print" style={{ display: 'flex', gap: 8, margin: '12px 0 4px' }}>
-                <button className={btn} onClick={() => window.print()}>Cetak / Simpan PDF</button>
+                <button className={btn} onClick={() => setMencetak(true)}>Cetak / Simpan PDF</button>
                 <button className={btn} onClick={() => setSelected(null)}>Tutup</button>
               </div>
             </>
           )}
         </div>
+      )}
+
+      {/* portal print: hanya rapor yang ikut print — elemen lain disembunyikan CSS print */}
+      {mencetak && selected && createPortal(
+        <div className="print-zone">{raporJsx()}</div>,
+        document.body
       )}
     </div>
   )

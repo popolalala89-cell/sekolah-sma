@@ -881,16 +881,16 @@ input, select, textarea { font-family: var(--font); }
 .r-c { text-align: center !important; }
 .r-bold { font-weight: 700; }
 .r-foot { font-size: 0.68rem; color: var(--on-surface-variant); margin-top: 10px; text-align: right; }
+.print-zone { display: none; } /* portal cetak hanya tampil saat print */
 
 @media print {
-  .top-app-bar, .bottom-nav, .no-print { display: none !important; }
-  body { background: #fff !important; }
-  .page-wrap { max-width: 100% !important; padding: 0; }
-  .card { box-shadow: none; }
-  .rapor { border: none; box-shadow: none; padding: 0 4px; }
-  .rapor-scroll { overflow: visible !important; }
-  .rapor-table { min-width: 0 !important; }
-  .rapor-table th, .rapor-table td { border-color: #333; }
+  /* mode cetak rapor: sembunyikan seluruh app, tampilkan hanya portal print */
+  body > *:not(.print-zone) { display: none !important; }
+  .print-zone { display: block !important; }
+  .print-zone .rapor { border: none; box-shadow: none; padding: 0 4px; }
+  .print-zone .rapor-scroll { overflow: visible !important; }
+  .print-zone .rapor-table { min-width: 0 !important; }
+  .print-zone .rapor-table th, .print-zone .rapor-table td { border-color: #333; }
 }
 
 /* ── Jadwal pelajaran ─────────────────────────────────────────── */
