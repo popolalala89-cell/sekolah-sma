@@ -223,6 +223,7 @@ export default function RaporPage({ peran }: { peran: Peran }) {
                   <span>NISN: {selected.nisn}</span>
                   <span>Rombel: {isKelas ? rombels.find((r) => r.id === rombelId)?.nama ?? '-' : rombelNama}</span>
                 </div>
+                <div className="rapor-scroll">
                 <table className="rapor-table">
                   <thead>
                     <tr>
@@ -256,6 +257,7 @@ export default function RaporPage({ peran }: { peran: Peran }) {
                     </tr>
                   </tfoot>
                 </table>
+                </div>
                 <p className="r-foot">Dicetak via aplikasi — Arsip digital di fase 2 (e-Rapor).</p>
               </div>
               <div className="no-print" style={{ display: 'flex', gap: 8, margin: '12px 0 4px' }}>
