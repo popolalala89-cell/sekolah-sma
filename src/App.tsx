@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import type { User } from '@supabase/supabase-js'
 import { supabase, peranDariUser, type Peran } from './lib/supabase'
+import { namaSekolah } from './lib/db'
 import { ToastProvider, Modal } from './lib/ui'
 import { MIcon } from './lib/icons'
 import Login from './pages/Login'
@@ -28,6 +29,10 @@ function useAuth() {
     })
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null)
+    })
+    // Judul tab ikut nama sekolah (kalau sudah diisi di DB)
+    namaSekolah().then((n) => {
+      if (n && n !== 'Sekolah SMA') document.title = n
     })
     return () => sub.subscription.unsubscribe()
   }, [])

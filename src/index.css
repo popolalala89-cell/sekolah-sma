@@ -725,6 +725,49 @@ input, select, textarea { font-family: var(--font); }
 }
 
 /* ── Grid dashboard ────────────────────────────────────────────── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+@media (min-width: 560px) { .stat-grid { grid-template-columns: repeat(3, 1fr); } }
+.stat-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  padding: 14px 14px 12px;
+  color: #ffffff;
+  box-shadow: var(--elev-1);
+  overflow: hidden;
+}
+.stat-card::after {
+  content: "";
+  position: absolute;
+  right: -18px;
+  top: -18px;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+}
+.stat-card .stat-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+.stat-card .stat-nilai { font-size: 21px; font-weight: 700; line-height: 1.15; white-space: nowrap; }
+.stat-card .stat-label { font-size: 11.5px; opacity: 0.92; margin-top: 2px; }
+.sk-biru   { background: linear-gradient(135deg, #2e5ca8, #4a7dd6); }
+.sk-hijau  { background: linear-gradient(135deg, #178a52, #34b877); }
+.sk-ungu   { background: linear-gradient(135deg, #6d3fc4, #9a6ff0); }
+.sk-oranye { background: linear-gradient(135deg, #d97706, #f5a524); }
+
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
