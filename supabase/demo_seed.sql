@@ -141,39 +141,37 @@ insert into public.absensi (sekolah_id, siswa_id, rombel_id, mapel_id, tanggal, 
 select s.id, sw.id, r.id, m.id, current_date - v.hari_lalu, 1, v.status, g.id
 from public.sekolah s
 cross join public.rombel r
-cross join public.siswa sw
 cross join (values
-  (0, 'H'), (0, 'H'), (0, 'H'), (0, 'S'), (0, 'H'), (0, 'A'),
-  (1, 'H'), (1, 'H'), (1, 'I'), (1, 'H'), (1, 'H'), (1, 'H')
-) as v(hari_lalu, status)
+  ('DEMO0001', 0, 'H'), ('DEMO0002', 0, 'H'), ('DEMO0003', 0, 'H'),
+  ('DEMO0004', 0, 'S'), ('DEMO0005', 0, 'H'), ('DEMO0006', 0, 'A'),
+  ('DEMO0001', 1, 'H'), ('DEMO0002', 1, 'H'), ('DEMO0003', 1, 'I'),
+  ('DEMO0004', 1, 'H'), ('DEMO0005', 1, 'H'), ('DEMO0006', 1, 'H')
+) as v(nisn, hari_lalu, status)
+join public.siswa sw on sw.nisn = v.nisn
 join public.mapel m on m.sekolah_id = s.id and m.kode = 'BIN'
 join public.guru g on g.sekolah_id = s.id and g.nip = 'DEMO-G2'
 join public.rombel_siswa rs on rs.siswa_id = sw.id and rs.rombel_id = r.id
 where r.nama in ('X-Ipa-Demo', 'XI-Ipa-Demo')
-  and sw.nisn like 'DEMO%'
-  and sw.nisn = case (row_number() over (partition by v.hari_lalu order by sw.nisn) - 1) % 6 + 1
-    when 1 then 'DEMO0001' when 2 then 'DEMO0002' when 3 then 'DEMO0003'
-    when 4 then 'DEMO0004' when 5 then 'DEMO0005' else 'DEMO0006' end
 on conflict (siswa_id, tanggal, mapel_id) do nothing;
 
 insert into public.nilai (sekolah_id, siswa_id, mapel_id, rombel_id, guru_id, jenis, nilai, semester, tahun_ajaran_id)
 select s.id, sw.id, m.id, r.id, g.id, v.jenis, v.angka, 1, ta.id
 from public.sekolah s
-cross join public.siswa sw
 cross join public.rombel r
 cross join public.tahun_ajaran ta
 cross join (values
-  ('tugas', 85), ('formatif', 88), ('sumatif', 90), ('uts', 82),
-  ('tugas', 80), ('formatif', 84), ('sumatif', 86), ('uts', 78)
-) as v(jenis, angka)
+  ('DEMO0001', 'tugas', 85), ('DEMO0001', 'formatif', 88), ('DEMO0001', 'sumatif', 90), ('DEMO0001', 'uts', 82),
+  ('DEMO0002', 'tugas', 80), ('DEMO0002', 'formatif', 84), ('DEMO0002', 'sumatif', 86), ('DEMO0002', 'uts', 78),
+  ('DEMO0003', 'tugas', 87), ('DEMO0003', 'formatif', 85), ('DEMO0003', 'sumatif', 89), ('DEMO0003', 'uts', 83),
+  ('DEMO0004', 'tugas', 82), ('DEMO0004', 'formatif', 86), ('DEMO0004', 'sumatif', 88), ('DEMO0004', 'uts', 81),
+  ('DEMO0005', 'tugas', 84), ('DEMO0005', 'formatif', 87), ('DEMO0005', 'sumatif', 91), ('DEMO0005', 'uts', 85),
+  ('DEMO0006', 'tugas', 79), ('DEMO0006', 'formatif', 83), ('DEMO0006', 'sumatif', 85), ('DEMO0006', 'uts', 80)
+) as v(nisn, jenis, angka)
+join public.siswa sw on sw.nisn = v.nisn
 join public.mapel m on m.sekolah_id = s.id and m.kode = 'MTK'
 join public.guru g on g.sekolah_id = s.id and g.nip = 'DEMO-G1'
 join public.rombel_siswa rs on rs.siswa_id = sw.id and rs.rombel_id = r.id
 where r.nama in ('X-Ipa-Demo', 'XI-Ipa-Demo')
-  and sw.nisn like 'DEMO%'
-  and sw.nisn = case (row_number() over (partition by v.jenis order by sw.nisn) - 1) % 6 + 1
-    when 1 then 'DEMO0001' when 2 then 'DEMO0002' when 3 then 'DEMO0003'
-    when 4 then 'DEMO0004' when 5 then 'DEMO0005' else 'DEMO0006' end
 on conflict (siswa_id, mapel_id, semester, jenis) do nothing;
 
 -- ── BLOK 4: SPP (biaya + tagihan + pembayaran demo) ──────────────────
