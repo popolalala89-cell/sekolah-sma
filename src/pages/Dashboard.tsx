@@ -25,7 +25,10 @@ export default function Dashboard({ peran, email }: { peran: Peran | null; email
               { label: 'Nilai', sub: 'input nilai kelas', to: '/nilai', icon: 'scoreboard' },
               { label: 'Rapor', sub: 'rekap & cetak', to: '/rapor', icon: 'assignment' },
             ]
-          : []),
+          : [
+              { label: 'Rapor Anak', sub: 'lihat rapor anak', to: '/rapor', icon: 'assignment' },
+              { label: 'Tagihan SPP', sub: 'status pembayaran', to: '/tagihan-saya', icon: 'payments' },
+            ]),
       ]
 
   return (

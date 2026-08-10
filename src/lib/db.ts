@@ -228,6 +228,24 @@ export async function guruIdLogin(): Promise<string | null> {
   return (data?.terkait_id as string | null) ?? null
 }
 
+/** id siswa dari baris akun user yang login (untuk peran siswa) */
+export async function siswaIdLogin(): Promise<string | null> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  const { data } = await supabase.from('akun').select('terkait_id').eq('user_id', user.id).maybeSingle()
+  return (data?.terkait_id as string | null) ?? null
+}
+
+/** daftar anak milik wali yang login (via RPC siswa_ids_for_wali, RLS aman) */
+export async function anakSaya(): Promise<Siswa[]> {
+  const { data: ids, error } = await supabase.rpc('siswa_ids_for_wali')
+  if (error) throw new Error(error.message)
+  const arr = (ids ?? []) as string[]
+  if (arr.length === 0) return []
+  const { data } = await supabase.from('siswa').select('*').in('id', arr).order('nama')
+  return (data ?? []) as Siswa[]
+}
+
 // ── Nilai & Rapor ────────────────────────────────────────────────
 export const JENIS_NILAI = ['tugas', 'formatif', 'sumatif', 'uts', 'uas'] as const
 export type JenisNilai = (typeof JENIS_NILAI)[number]
@@ -439,6 +457,20 @@ export async function generateTagihanBulanan(bulan: string): Promise<number> {
 export async function listTagihan(bulan: string): Promise<Tagihan[]> {
   const { data } = await supabase.from('tagihan').select('*').eq('bulan', bulan).order('created_at')
   return (data ?? []) as Tagihan[]
+}
+
+/** tagihan milik satu siswa (utk halaman wali/siswa) + nama biaya via lookup lokal */
+export async function listTagihanSiswa(siswaId: string): Promise<(Tagihan & { biayaNama: string | null })[]> {
+  const { data } = await supabase
+    .from('tagihan')
+    .select('id, siswa_id, biaya_id, bulan, nominal, jatuh_tempo, status')
+    .eq('siswa_id', siswaId)
+    .order('bulan', { ascending: false })
+  const rows = (data ?? []) as Tagihan[]
+  if (rows.length === 0) return []
+  const biayas = await listBiaya()
+  const mp = new Map(biayas.map((b) => [b.id, b.nama]))
+  return rows.map((r) => ({ ...r, biayaNama: r.biaya_id ? mp.get(r.biaya_id) ?? null : null }))
 }
 
 export async function listPembayaran(): Promise<Pembayaran[]> {

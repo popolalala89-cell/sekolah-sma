@@ -16,6 +16,7 @@ import NilaiPage from './pages/NilaiPage'
 import RaporPage from './pages/RaporPage'
 import JadwalPage from './pages/JadwalPage'
 import SppPage from './pages/SppPage'
+import TagihanSayaPage from './pages/TagihanSayaPage'
 
 function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -52,9 +53,13 @@ const NAVS: Record<Peran, { to: string; label: string; icon: string }[]> = {
   ],
   wali: [
     { to: '/', label: 'Beranda', icon: 'home' },
+    { to: '/rapor', label: 'Rapor', icon: 'assignment' },
+    { to: '/tagihan-saya', label: 'Tagihan', icon: 'payments' },
   ],
   siswa: [
     { to: '/', label: 'Beranda', icon: 'home' },
+    { to: '/rapor', label: 'Rapor', icon: 'assignment' },
+    { to: '/tagihan-saya', label: 'Tagihan', icon: 'payments' },
   ],
 }
 
@@ -62,6 +67,7 @@ const JUDUL: Record<string, string> = {
   '/': 'Beranda', '/siswa': 'Data Siswa', '/guru': 'Data Guru',
   '/rombel': 'Rombel', '/jurusan': 'Jurusan', '/wali': 'Wali Murid',
   '/nilai': 'Nilai', '/rapor': 'Rapor', '/jadwal': 'Jadwal', '/spp': 'Keuangan SPP',
+  '/tagihan-saya': 'Tagihan SPP',
 }
 
 function Shell({ user, peran, children }: { user: User; peran: Peran | null; children: React.ReactNode }) {
@@ -118,9 +124,10 @@ function AppRoutes() {
         <Route path="/wali" element={<Guarded peran={peran} roles={['admin']}><WaliPage /></Guarded>} />
         <Route path="/absensi" element={<Guarded peran={peran} roles={['admin', 'guru']}><AbsensiPage /></Guarded>} />
         <Route path="/nilai" element={<Guarded peran={peran} roles={['admin', 'guru']}><NilaiPage /></Guarded>} />
-        <Route path="/rapor" element={<Guarded peran={peran} roles={['admin', 'guru']}><RaporPage /></Guarded>} />
+        <Route path="/rapor" element={<Guarded peran={peran} roles={['admin', 'guru', 'wali', 'siswa']}><RaporPage peran={peran!} /></Guarded>} />
         <Route path="/jadwal" element={<Guarded peran={peran} roles={['admin', 'guru']}><JadwalPage /></Guarded>} />
         <Route path="/spp" element={<Guarded peran={peran} roles={['admin']}><SppPage /></Guarded>} />
+        <Route path="/tagihan-saya" element={<Guarded peran={peran} roles={['wali', 'siswa']}><TagihanSayaPage peran={peran!} /></Guarded>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Shell>
